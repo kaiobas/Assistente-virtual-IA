@@ -8,29 +8,29 @@ Closes #<!-- número da issue -->
 
 ## 🔄 Tipo de Mudança
 
-- [ ] 🐛 Bug fix
-- [ ] ✨ Nova feature
-- [ ] 📝 Documentação
-- [ ] 🏗️ Infraestrutura
-- [ ] ♻️ Refatoração
-- [ ] 🧪 Testes
+- [fix] 🐛 Bug fix
+- [feat] ✨ Nova feature
+- [doc] 📝 Documentação
+- [infra] 🏗️ Infraestrutura
+- [refactor] ♻️ Refatoração
+- [test] 🧪 Testes
 
 ## 📦 Módulo Afetado
 
-- [ ] Automação (n8n)
-- [ ] WhatsApp (Evolution API)
-- [ ] IA (OpenAI / Whisper)
-- [ ] Dashboard
-- [ ] Banco de Dados (Supabase)
-- [ ] Infraestrutura
-- [ ] Documentação
+- [automacao] Automação (n8n)
+- [whatsapp] WhatsApp (Evolution API)
+- [ia] IA (OpenAI / Whisper)
+- [frontend] Dashboard
+- [database] Banco de Dados (Supabase)
+- [infra] Infraestrutura
+- [doc] Documentação
 
 ## ✅ Checklist
 
-- [ ] Testei as mudanças localmente
-- [ ] Atualizei a documentação relevante
-- [ ] Não há segredos ou chaves de API no código
-- [ ] As variáveis de ambiente necessárias estão documentadas no `.env.example`
+- [1] Testei as mudanças localmente
+- [2] Atualizei a documentação relevante
+- [3] Não há segredos ou chaves de API no código
+- [4] As variáveis de ambiente necessárias estão documentadas no `.env.example`
 
 ## 📸 Screenshots (se aplicável)
 

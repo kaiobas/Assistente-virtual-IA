@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # ─── n8n ────────────────────────────────────────────────────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - WEBHOOK_URL=http://n8n:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - assistente-net
+    depends_on:
+      - redis
+
+  # ─── Evolution API ──────────────────────────────────────────────────────────
+  evolution-api:
+    image: atendai/evolution-api:latest
+    container_name: evolution-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+      - AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
+      - QRCODE_LIMIT=30
+      - WEBHOOK_GLOBAL_ENABLED=false
+      - CONFIG_SESSION_PHONE_CLIENT=Assistente IA
+    volumes:
+      - evolution_data:/evolution/instances
+    networks:
+      - assistente-net
+
+  # ─── Redis ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - assistente-net
+
+# ─── Volumes ────────────────────────────────────────────────────────────────
+volumes:
+  n8n_data:
+  evolution_data:
+  redis_data:
+
+# ─── Networks ───────────────────────────────────────────────────────────────
+networks:
+  assistente-net:
+    driver: bridge

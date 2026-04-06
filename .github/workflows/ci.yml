@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-docs:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for required docs
+        run: |
+          required_files=(
+            "README.md"
+            "docs/architecture.md"
+            "docs/roadmap.md"
+            "docs/setup.md"
+            "docs/contributing.md"
+            "infra/.env.example"
+          )
+          missing=0
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "❌ Missing required file: $f"
+              missing=1
+            else
+              echo "✅ Found: $f"
+            fi
+          done
+          exit $missing
+
+  validate-env-example:
+    name: Validate .env.example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check .env.example has no real secrets
+        run: |
+          if grep -E "(sk-[a-zA-Z0-9]{20,}|eyJ[a-zA-Z0-9]{10,})" infra/.env.example; then
+            echo "❌ Possible real secret found in .env.example"
+            exit 1
+          else
+            echo "✅ No real secrets detected in .env.example"
+          fi

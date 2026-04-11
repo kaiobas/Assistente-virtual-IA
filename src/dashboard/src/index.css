@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* ─── Fonte Mac-like + escala de texto aumentada ─── */
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;
+  --text-xs:   0.8125rem;   /* 13px (era 12px) */
+  --text-sm:   0.9375rem;   /* 15px (era 14px) */
+  --text-base: 1.0625rem;   /* 17px (era 16px) */
+  --text-lg:   1.1875rem;   /* 19px (era 18px) */
+  --text-xl:   1.3125rem;   /* 21px (era 20px) */
+  --text-2xl:  1.5625rem;   /* 25px (era 24px) */
+}
+
 /* ─── Variáveis CSS brutas (valores HSL sem hsl()) ─── */
 :root {
   /* Tema primário */
@@ -12,8 +23,8 @@
   --sidebar-active-bg: 217 91% 60%;
   --sidebar-active-text: 0 0% 100%;
   --sidebar-hover-bg: 220 47% 30%;
-  --sidebar-width: 240px;
-  --sidebar-collapsed-width: 64px;
+  --sidebar-width: 256px;
+  --sidebar-collapsed-width: 68px;
 
   /* Base shadcn */
   --background: 0 0% 98%;
@@ -69,7 +80,11 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    font-size: 0.9375rem; /* 15px — garante base mesmo sem classe text-* */
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 

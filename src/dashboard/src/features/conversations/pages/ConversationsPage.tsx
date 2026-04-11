@@ -39,7 +39,7 @@ export default function ConversationsPage() {
       description="Histórico de atendimentos via WhatsApp"
     >
       {/* Layout estilo WhatsApp Web */}
-      <div className="flex h-[calc(100vh-180px)] bg-white rounded-xl border border-border overflow-hidden">
+      <div className="flex h-[calc(100vh-180px)] bg-card rounded-xl border border-border overflow-hidden">
         {/* Painel esquerdo — lista de sessões */}
         <div className="w-80 flex-shrink-0 border-r flex flex-col">
           {/* Filtros */}

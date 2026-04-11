@@ -26,7 +26,7 @@ export function LogTab() {
         </span>
       </div>
 
-      <div className="bg-white rounded-xl border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/40">
@@ -98,7 +98,7 @@ export function LogTab() {
                   <tr key={`${item.id}-expanded`} className="bg-muted/20">
                     <td colSpan={6} className="px-8 py-3">
                       <p className="text-xs font-medium text-muted-foreground mb-1">Mensagem enviada:</p>
-                      <p className="text-sm text-foreground whitespace-pre-wrap bg-white border rounded-lg px-3 py-2">
+                      <p className="text-sm text-foreground whitespace-pre-wrap bg-muted border rounded-lg px-3 py-2">
                         {item.message_body}
                       </p>
                       {item.error_message && (

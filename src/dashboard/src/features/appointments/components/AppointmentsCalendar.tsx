@@ -45,7 +45,7 @@ export function AppointmentsCalendar() {
   }, [appointments, days])
 
   return (
-    <div className="bg-white rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Navegação da semana */}
       <div className="flex items-center justify-between px-5 py-3 border-b">
         <Button

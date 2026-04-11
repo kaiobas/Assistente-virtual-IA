@@ -17,7 +17,7 @@ export function UpcomingAppointments() {
   const apptList = (appointments ?? []) as UpcomingAppointment[]
 
   return (
-    <div className="bg-white rounded-xl border border-border p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       <div className="flex items-center gap-2 mb-4">
         <CalendarDays size={16} className="text-muted-foreground" />
         <h2 className="text-sm font-medium text-foreground">Próximos agendamentos</h2>

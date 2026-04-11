@@ -27,7 +27,7 @@ export default function ProfessionalsPage() {
     >
       <div className="flex gap-5 h-[calc(100vh-180px)]">
         {/* Lista */}
-        <div className="w-72 flex-shrink-0 bg-white rounded-xl border border-border overflow-hidden flex flex-col">
+        <div className="w-72 flex-shrink-0 bg-card rounded-xl border border-border overflow-hidden flex flex-col">
           <div className="flex-1 overflow-y-auto">
             {isLoading && (
               <div className="p-3 space-y-2">
@@ -59,7 +59,7 @@ export default function ProfessionalsPage() {
         </div>
 
         {/* Detalhe */}
-        <div className="flex-1 bg-white rounded-xl border border-border overflow-hidden">
+        <div className="flex-1 bg-card rounded-xl border border-border overflow-hidden">
           {selected ? (
             <ProfessionalDetailPanel key={selected.id} professional={selected} />
           ) : (

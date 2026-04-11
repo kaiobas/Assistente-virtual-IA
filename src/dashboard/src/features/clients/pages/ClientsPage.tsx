@@ -48,7 +48,7 @@ export default function ClientsPage() {
       <div className="flex gap-5 h-[calc(100vh-180px)]">
 
         {/* Painel esquerdo — lista */}
-        <div className="w-80 flex-shrink-0 bg-white rounded-xl border border-border flex flex-col overflow-hidden">
+        <div className="w-80 flex-shrink-0 bg-card rounded-xl border border-border flex flex-col overflow-hidden">
 
           {/* Filtros */}
           <div className="p-3 border-b space-y-2">
@@ -113,7 +113,7 @@ export default function ClientsPage() {
         </div>
 
         {/* Painel direito — detalhes */}
-        <div className="flex-1 bg-white rounded-xl border border-border overflow-hidden">
+        <div className="flex-1 bg-card rounded-xl border border-border overflow-hidden">
           {selectedClient ? (
             <ClientDetailPanel key={selectedClient.id} client={selectedClient} />
           ) : (

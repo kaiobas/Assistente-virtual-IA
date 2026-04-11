@@ -104,7 +104,7 @@ export function QueueTab() {
       </div>
 
       {/* Tabela */}
-      <div className="bg-white rounded-xl border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/40">

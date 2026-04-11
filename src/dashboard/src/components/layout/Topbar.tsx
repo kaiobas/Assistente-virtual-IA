@@ -13,7 +13,8 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '@/lib/constants'
-import { LogOut, Settings } from 'lucide-react'
+import { LogOut, Settings, Sun, Moon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 function getInitials(email: string): string {
   return email.slice(0, 2).toUpperCase()
@@ -21,7 +22,7 @@ function getInitials(email: string): string {
 
 export function Topbar() {
   const { user, clear } = useAuthStore()
-  const { sidebarCollapsed } = useUIStore()
+  const { sidebarCollapsed, theme, toggleTheme } = useUIStore()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -32,7 +33,7 @@ export function Topbar() {
 
   return (
     <header
-      className="fixed top-0 right-0 z-30 h-16 flex items-center justify-between px-6 border-b bg-white"
+      className="fixed top-0 right-0 z-30 h-16 flex items-center justify-between px-6 border-b bg-card"
       style={{
         left: sidebarCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
         transition: 'left 200ms ease',
@@ -41,6 +42,17 @@ export function Topbar() {
       <div id="topbar-title" />
 
       <div className="flex items-center gap-3 ml-auto">
+        {/* Toggle de tema */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

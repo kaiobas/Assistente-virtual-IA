@@ -101,7 +101,7 @@ function NotificationSettingCard({ setting }: { setting: NotificationSetting }) 
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-border p-5 transition-opacity',
+        'bg-card rounded-xl border border-border p-5 transition-opacity',
         !setting.enabled && 'opacity-60',
       )}
     >

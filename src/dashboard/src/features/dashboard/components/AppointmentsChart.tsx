@@ -30,7 +30,7 @@ export function AppointmentsChart() {
   const { data, isLoading } = useAppointmentsChart(days)
 
   return (
-    <div className="bg-white rounded-xl border border-border p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-sm font-medium text-foreground">Agendamentos por período</h2>

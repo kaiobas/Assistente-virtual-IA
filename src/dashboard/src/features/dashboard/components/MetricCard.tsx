@@ -22,7 +22,7 @@ export function MetricCard({ label, value, icon: Icon, color = 'blue', loading }
   const colors = colorMap[color]
 
   return (
-    <div className="bg-white rounded-xl border border-border p-4 flex items-center gap-4">
+    <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-4">
       <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', colors.bg)}>
         <Icon size={18} className={colors.icon} />
       </div>

@@ -1,1 +1,1 @@
-export { } from './pages/ProfessionalsPage'
+export { default as ProfessionalsPage } from './pages/ProfessionalsPage'

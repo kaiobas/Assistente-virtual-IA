@@ -49,15 +49,28 @@ export interface Database {
         Row: {
           id: string
           business_id: string
+          name: string
           display_name: string
           specialty: string | null
-          phone: string | null
+          avatar_url: string | null
           active: boolean
           created_at: string
           updated_at: string
         }
         Insert: Omit<Database['public']['Tables']['professionals']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['professionals']['Insert']>
+      }
+      availability_rules: {
+        Row: {
+          id: string
+          professional_id: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          active: boolean
+        }
+        Insert: Omit<Database['public']['Tables']['availability_rules']['Row'], 'id'>
+        Update: Partial<Database['public']['Tables']['availability_rules']['Insert']>
       }
       services: {
         Row: {

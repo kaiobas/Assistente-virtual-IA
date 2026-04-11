@@ -1,7 +1,11 @@
+import { PageWrapper } from '@/components/layout'
+
 export default function ConversationsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Conversas</h1>
-    </div>
+    <PageWrapper title="Conversas" description="Histórico de conversas do WhatsApp">
+      <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        Em construção
+      </div>
+    </PageWrapper>
   )
 }

@@ -1,7 +1,11 @@
+import { PageWrapper } from '@/components/layout'
+
 export default function AppointmentsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Agendamentos</h1>
-    </div>
+    <PageWrapper title="Agendamentos" description="Gerencie os agendamentos">
+      <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        Em construção
+      </div>
+    </PageWrapper>
   )
 }

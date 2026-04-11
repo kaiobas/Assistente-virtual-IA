@@ -1,7 +1,11 @@
+import { PageWrapper } from '@/components/layout'
+
 export default function ProfessionalsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Profissionais</h1>
-    </div>
+    <PageWrapper title="Profissionais" description="Gerencie os profissionais">
+      <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        Em construção
+      </div>
+    </PageWrapper>
   )
 }

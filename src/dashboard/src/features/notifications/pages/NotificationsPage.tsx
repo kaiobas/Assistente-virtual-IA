@@ -1,7 +1,11 @@
+import { PageWrapper } from '@/components/layout'
+
 export default function NotificationsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Notificações</h1>
-    </div>
+    <PageWrapper title="Notificações" description="Central de notificações">
+      <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        Em construção
+      </div>
+    </PageWrapper>
   )
 }

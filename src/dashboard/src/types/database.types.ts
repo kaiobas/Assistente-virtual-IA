@@ -127,17 +127,33 @@ export interface Database {
       conversation_sessions: {
         Row: {
           id: string
+          session_id: string
           business_id: string
           client_id: string
           status: 'active' | 'human_takeover' | 'closed'
           context_summary: string | null
           started_at: string
           last_message_at: string
+          closed_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: Omit<Database['public']['Tables']['conversation_sessions']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['conversation_sessions']['Insert']>
+      }
+      conversation_messages: {
+        Row: {
+          id: string
+          session_id: string
+          role: 'user' | 'assistant' | 'tool'
+          content: string
+          media_type: 'text' | 'audio' | 'image' | 'document' | null
+          media_url: string | null
+          tokens_used: number | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['conversation_messages']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['conversation_messages']['Insert']>
       }
     }
     Views: Record<string, never>
@@ -145,6 +161,7 @@ export interface Database {
     Enums: {
       appointment_status: 'pending' | 'confirmed' | 'cancelled_by_client' | 'cancelled_by_business' | 'cancelled_auto' | 'completed' | 'no_show'
       ia_status_enum: 'active' | 'human_takeover' | 'blocked'
+      session_status: 'active' | 'human_takeover' | 'closed'
     }
   }
 }

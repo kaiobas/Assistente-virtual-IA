@@ -17,8 +17,11 @@ export interface Database {
           professional_id: string
           service_id: string
           scheduled_at: string
-          status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
+          ends_at: string
+          status: 'pending' | 'confirmed' | 'cancelled_by_client' | 'cancelled_by_business' | 'cancelled_auto' | 'completed' | 'no_show'
+          source: 'whatsapp' | 'dashboard' | 'manual'
           notes: string | null
+          cancelled_reason: string | null
           created_at: string
           updated_at: string
         }
@@ -29,10 +32,12 @@ export interface Database {
         Row: {
           id: string
           business_id: string
-          name: string
+          name: string | null
           phone: string
           email: string | null
           notes: string | null
+          first_contact_at: string | null
+          last_contact_at: string | null
           created_at: string
           updated_at: string
         }
@@ -43,7 +48,8 @@ export interface Database {
         Row: {
           id: string
           business_id: string
-          name: string
+          display_name: string
+          specialty: string | null
           phone: string | null
           active: boolean
           created_at: string
@@ -59,6 +65,7 @@ export interface Database {
           name: string
           duration_min: number
           price: number
+          category: string | null
           active: boolean
           created_at: string
           updated_at: string
@@ -116,9 +123,22 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['notifications']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['notifications']['Insert']>
       }
+      conversation_sessions: {
+        Row: {
+          id: string
+          business_id: string
+          status: 'active' | 'human_takeover' | 'closed'
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['conversation_sessions']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['conversation_sessions']['Insert']>
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
-    Enums: Record<string, never>
+    Enums: {
+      appointment_status: 'pending' | 'confirmed' | 'cancelled_by_client' | 'cancelled_by_business' | 'cancelled_auto' | 'completed' | 'no_show'
+    }
   }
 }

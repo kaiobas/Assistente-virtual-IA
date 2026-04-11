@@ -1,26 +1,83 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { QUERY_KEYS } from '@/lib/constants'
-import { getAppointments } from '@/services/appointments.service'
-import type { Database } from '@/types/database.types'
-import type { DateRangeFilter } from '@/types'
+import {
+  getAppointments,
+  getAppointmentsByDateRange,
+  createAppointment,
+  updateAppointmentStatus,
+  getProfessionals,
+  getServices,
+  searchClients,
+  type AppointmentFilters,
+  type AppointmentStatus,
+  type CreateAppointmentPayload,
+} from '@/services/appointments.service'
 
-type AppointmentStatus = Database['public']['Tables']['appointments']['Row']['status']
-
-interface UseAppointmentsParams {
-  page?: number
-  pageSize?: number
-  status?: AppointmentStatus
-  dateRange?: DateRangeFilter
+export function useAppointments(filters: AppointmentFilters = {}) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.APPOINTMENTS, filters],
+    queryFn: () => getAppointments(filters),
+  })
 }
 
-export function useAppointments({
-  page = 1,
-  pageSize = 20,
-  status,
-  dateRange,
-}: UseAppointmentsParams = {}) {
+export function useAppointmentsByDateRange(dateFrom: string, dateTo: string) {
   return useQuery({
-    queryKey: [QUERY_KEYS.APPOINTMENTS, { page, pageSize, status, dateRange }],
-    queryFn: () => getAppointments({ page, pageSize, status, dateRange }),
+    queryKey: [QUERY_KEYS.APPOINTMENTS, 'calendar', dateFrom, dateTo],
+    queryFn: () => getAppointmentsByDateRange(dateFrom, dateTo),
+    enabled: !!dateFrom && !!dateTo,
+  })
+}
+
+export function useCreateAppointment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateAppointmentPayload) => createAppointment(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.APPOINTMENTS] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}
+
+export function useUpdateAppointmentStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      status,
+      reason,
+    }: {
+      id: string
+      status: AppointmentStatus
+      reason?: string
+    }) => updateAppointmentStatus(id, status, reason),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.APPOINTMENTS] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}
+
+export function useProfessionals() {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PROFESSIONALS],
+    queryFn: getProfessionals,
+    staleTime: 1000 * 60 * 10,
+  })
+}
+
+export function useServices() {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SERVICES],
+    queryFn: getServices,
+    staleTime: 1000 * 60 * 10,
+  })
+}
+
+export function useSearchClients(query: string) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CLIENTS, 'search', query],
+    queryFn: () => searchClients(query),
+    enabled: query.length >= 2,
   })
 }

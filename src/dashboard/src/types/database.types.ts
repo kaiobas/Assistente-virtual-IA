@@ -175,6 +175,48 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['conversation_messages']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['conversation_messages']['Insert']>
       }
+      notification_queue: {
+        Row: {
+          id: string
+          appointment_id: string | null
+          client_id: string | null
+          type: 'reminder_d1' | 'reminder_h2' | 'confirmation_request' | 'cancellation_notice' | 'booking_confirmed' | 'booking_created'
+          send_at: string
+          status: 'pending' | 'sent' | 'failed' | 'cancelled'
+          expires_at: string | null
+          attempts: number
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['notification_queue']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['notification_queue']['Insert']>
+      }
+      notification_log: {
+        Row: {
+          id: string
+          queue_id: string
+          appointment_id: string | null
+          channel: 'whatsapp' | 'sms' | 'email'
+          message_body: string
+          sent_at: string
+          delivery_status: 'delivered' | 'read' | 'failed' | 'unknown'
+          error_message: string | null
+        }
+        Insert: Omit<Database['public']['Tables']['notification_log']['Row'], 'id'>
+        Update: Partial<Database['public']['Tables']['notification_log']['Insert']>
+      }
+      notification_settings: {
+        Row: {
+          id: string
+          business_id: string
+          type: string
+          enabled: boolean
+          advance_hours: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['notification_settings']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['notification_settings']['Insert']>
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

@@ -36,6 +36,7 @@ export interface Database {
           phone: string
           email: string | null
           notes: string | null
+          ia_status: 'active' | 'human_takeover' | 'blocked'
           first_contact_at: string | null
           last_contact_at: string | null
           created_at: string
@@ -127,7 +128,11 @@ export interface Database {
         Row: {
           id: string
           business_id: string
+          client_id: string
           status: 'active' | 'human_takeover' | 'closed'
+          context_summary: string | null
+          started_at: string
+          last_message_at: string
           created_at: string
           updated_at: string
         }
@@ -139,6 +144,7 @@ export interface Database {
     Functions: Record<string, never>
     Enums: {
       appointment_status: 'pending' | 'confirmed' | 'cancelled_by_client' | 'cancelled_by_business' | 'cancelled_auto' | 'completed' | 'no_show'
+      ia_status_enum: 'active' | 'human_takeover' | 'blocked'
     }
   }
 }

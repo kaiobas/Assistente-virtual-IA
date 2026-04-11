@@ -77,6 +77,7 @@ export interface Database {
           id: string
           business_id: string
           name: string
+          description: string | null
           duration_min: number
           price: number
           category: string | null
@@ -91,8 +92,14 @@ export interface Database {
         Row: {
           id: string
           name: string
-          phone: string | null
-          address: string | null
+          segment: string
+          phone_number: string
+          timezone: string
+          agent_name: string
+          agent_persona: string | null
+          business_rules: Record<string, unknown>
+          modules_enabled: Record<string, unknown>
+          active: boolean
           created_at: string
           updated_at: string
         }

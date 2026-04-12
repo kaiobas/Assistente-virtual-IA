@@ -11,6 +11,7 @@ import {
   type UpsertProfessionalPayload,
   type UpsertRulePayload,
 } from '@/services/professionals.service'
+import { toast } from 'sonner'
 
 export function useProfessionals() {
   return useQuery({
@@ -33,7 +34,11 @@ export function useCreateProfessional() {
     mutationFn: (payload: UpsertProfessionalPayload) =>
       createProfessional(payload),
     onSuccess: () => {
+      toast.success('Profissional criado com sucesso')
       void qc.invalidateQueries({ queryKey: [QUERY_KEYS.PROFESSIONALS] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao criar profissional')
     },
   })
 }
@@ -49,7 +54,11 @@ export function useUpdateProfessional() {
       payload: Parameters<typeof updateProfessional>[1]
     }) => updateProfessional(id, payload),
     onSuccess: () => {
+      toast.success('Dados atualizados')
       void qc.invalidateQueries({ queryKey: [QUERY_KEYS.PROFESSIONALS] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao atualizar profissional')
     },
   })
 }
@@ -59,6 +68,7 @@ export function useAddAvailabilityRule() {
   return useMutation({
     mutationFn: (payload: UpsertRulePayload) => addAvailabilityRule(payload),
     onSuccess: (_data, vars) => {
+      toast.success('Turno adicionado')
       void qc.invalidateQueries({
         queryKey: [
           QUERY_KEYS.PROFESSIONALS,
@@ -66,6 +76,9 @@ export function useAddAvailabilityRule() {
           'rules',
         ],
       })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao adicionar turno')
     },
   })
 }
@@ -80,6 +93,7 @@ export function useDeleteAvailabilityRule() {
       professionalId: string
     }) => deleteAvailabilityRule(ruleId),
     onSuccess: (_data, vars) => {
+      toast.success('Turno removido')
       void qc.invalidateQueries({
         queryKey: [
           QUERY_KEYS.PROFESSIONALS,
@@ -87,6 +101,9 @@ export function useDeleteAvailabilityRule() {
           'rules',
         ],
       })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao remover turno')
     },
   })
 }
@@ -103,6 +120,7 @@ export function useUpdateAvailabilityRule() {
       payload: { start_time: string; end_time: string }
     }) => updateAvailabilityRule(ruleId, payload),
     onSuccess: (_data, vars) => {
+      toast.success('Horário atualizado')
       void qc.invalidateQueries({
         queryKey: [
           QUERY_KEYS.PROFESSIONALS,
@@ -110,6 +128,9 @@ export function useUpdateAvailabilityRule() {
           'rules',
         ],
       })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao atualizar horário')
     },
   })
 }

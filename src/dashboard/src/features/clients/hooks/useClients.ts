@@ -8,6 +8,7 @@ import {
   type ClientFilters,
   type UpdateClientPayload,
 } from '@/services/clients.service'
+import { toast } from 'sonner'
 
 export function useClients(filters: ClientFilters = {}) {
   return useQuery({
@@ -38,7 +39,11 @@ export function useUpdateClient() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateClientPayload }) =>
       updateClient(id, payload),
     onSuccess: () => {
+      toast.success('Cliente atualizado')
       void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CLIENTS] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao atualizar cliente')
     },
   })
 }

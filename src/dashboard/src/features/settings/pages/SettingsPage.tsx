@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Building2, Bot, User, Check } from 'lucide-react'
+import { Building2, Bot, User } from 'lucide-react'
 import { PageWrapper } from '@/components/layout'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useBusiness, useUpdateBusiness } from '../hooks/useSettings'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/auth.store'
+import { toast } from 'sonner'
 
 const TIMEZONES = [
   { label: 'Cuiabá / Manaus (UTC-4)',     value: 'America/Manaus' },
@@ -45,7 +46,6 @@ type AgentForm = z.infer<typeof agentSchema>
 function BusinessTab() {
   const { data: business, isLoading } = useBusiness()
   const update = useUpdateBusiness()
-  const [saved, setSaved] = useState(false)
 
   const {
     register,
@@ -67,11 +67,7 @@ function BusinessTab() {
   }, [business, reset])
 
   function onSubmit(data: BusinessForm) {
-    void update.mutateAsync(data).then(() => {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-      reset(data)
-    })
+    void update.mutateAsync(data).then(() => { reset(data) })
   }
 
   if (isLoading) return <Skeleton className="h-64 w-full rounded-xl" />
@@ -125,13 +121,7 @@ function BusinessTab() {
       </div>
 
       <Button type="submit" disabled={!isDirty || update.isPending} className="gap-1.5">
-        {saved ? (
-          <><Check size={14} /> Salvo!</>
-        ) : update.isPending ? (
-          'Salvando...'
-        ) : (
-          'Salvar alterações'
-        )}
+        {update.isPending ? 'Salvando...' : 'Salvar alterações'}
       </Button>
     </form>
   )
@@ -141,7 +131,6 @@ function BusinessTab() {
 function AgentTab() {
   const { data: business, isLoading } = useBusiness()
   const update = useUpdateBusiness()
-  const [saved, setSaved] = useState(false)
 
   const {
     register,
@@ -160,11 +149,7 @@ function AgentTab() {
   }, [business, reset])
 
   function onSubmit(data: AgentForm) {
-    void update.mutateAsync(data).then(() => {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-      reset(data)
-    })
+    void update.mutateAsync(data).then(() => { reset(data) })
   }
 
   const rules = business?.business_rules ?? {}
@@ -199,13 +184,7 @@ function AgentTab() {
         </div>
 
         <Button type="submit" disabled={!isDirty || update.isPending} className="gap-1.5">
-          {saved ? (
-            <><Check size={14} /> Salvo!</>
-          ) : update.isPending ? (
-            'Salvando...'
-          ) : (
-            'Salvar persona'
-          )}
+          {update.isPending ? 'Salvando...' : 'Salvar persona'}
         </Button>
       </form>
 
@@ -247,7 +226,6 @@ function AccountTab() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
 
   function handleChangePassword() {
@@ -271,8 +249,7 @@ function AccountTab() {
         }
         setNewPassword('')
         setConfirmPassword('')
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2000)
+        toast.success('Senha alterada com sucesso')
       },
       (err: unknown) => {
         setLoading(false)
@@ -319,13 +296,7 @@ function AccountTab() {
           disabled={!newPassword || !confirmPassword || loading}
           className="gap-1.5"
         >
-          {saved ? (
-            <><Check size={14} /> Senha alterada!</>
-          ) : loading ? (
-            'Salvando...'
-          ) : (
-            'Alterar senha'
-          )}
+          {loading ? 'Salvando...' : 'Alterar senha'}
         </Button>
       </div>
     </div>

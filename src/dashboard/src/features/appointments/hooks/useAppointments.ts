@@ -12,6 +12,7 @@ import {
   type AppointmentStatus,
   type CreateAppointmentPayload,
 } from '@/services/appointments.service'
+import { toast } from 'sonner'
 
 export function useAppointments(filters: AppointmentFilters = {}) {
   return useQuery({
@@ -33,8 +34,12 @@ export function useCreateAppointment() {
   return useMutation({
     mutationFn: (payload: CreateAppointmentPayload) => createAppointment(payload),
     onSuccess: () => {
+      toast.success('Agendamento criado com sucesso')
       void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.APPOINTMENTS] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao criar agendamento')
     },
   })
 }
@@ -52,8 +57,12 @@ export function useUpdateAppointmentStatus() {
       reason?: string
     }) => updateAppointmentStatus(id, status, reason),
     onSuccess: () => {
+      toast.success('Status atualizado')
       void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.APPOINTMENTS] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao atualizar status')
     },
   })
 }

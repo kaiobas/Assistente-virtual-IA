@@ -9,6 +9,7 @@ import {
   updateNotificationSetting,
   type NotificationFilters,
 } from '@/services/notifications.service'
+import { toast } from 'sonner'
 
 export function useNotificationMetrics() {
   return useQuery({
@@ -37,7 +38,13 @@ export function useCancelNotification() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => cancelNotification(id),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: [QUERY_KEYS.NOTIFICATIONS] }) },
+    onSuccess: () => {
+      toast.success('Notificação cancelada')
+      void qc.invalidateQueries({ queryKey: [QUERY_KEYS.NOTIFICATIONS] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao cancelar notificação')
+    },
   })
 }
 
@@ -58,6 +65,12 @@ export function useUpdateNotificationSetting() {
       id: string
       payload: { enabled?: boolean; advance_hours?: number }
     }) => updateNotificationSetting(id, payload),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: [QUERY_KEYS.NOTIFICATIONS, 'settings'] }) },
+    onSuccess: () => {
+      toast.success('Configuração salva')
+      void qc.invalidateQueries({ queryKey: [QUERY_KEYS.NOTIFICATIONS, 'settings'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao salvar configuração')
+    },
   })
 }

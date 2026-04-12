@@ -5,6 +5,7 @@ import { queryClient } from '@/lib/queryClient'
 import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/lib/constants'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { Toaster } from '@/components/ui/sonner'
 
 // Páginas — lazy load por rota
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
@@ -66,6 +67,7 @@ export default function App() {
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
+      <Toaster position="bottom-right" richColors closeButton />
     </QueryClientProvider>
   )
 }

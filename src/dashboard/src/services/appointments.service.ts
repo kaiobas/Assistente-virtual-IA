@@ -95,39 +95,35 @@ export interface CreateAppointmentPayload {
   notes?: string
 }
 
-// Cria agendamento manual com cálculo automático de ends_at
+// Cria agendamento via Edge Function (com validação de disponibilidade)
 export async function createAppointment(payload: CreateAppointmentPayload) {
-  const { data: svcData, error: svcError } = await supabase
-    .from('services')
-    .select('duration_min')
-    .eq('id', payload.service_id)
-    .single()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) throw new Error('Não autenticado')
 
-  const service = svcData as { duration_min: number } | null
-  if (svcError ?? !service) throw new Error('Serviço não encontrado')
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+  const url = `${supabaseUrl}/functions/v1/create-appointment`
 
-  const scheduledAt = new Date(payload.scheduled_at)
-  const endsAt = new Date(scheduledAt.getTime() + service.duration_min * 60 * 1000)
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify(payload),
+  })
 
-  /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
-  const { data, error } = await (supabase as any)
-    .from('appointments')
-    .insert({
-      client_id: payload.client_id,
-      professional_id: payload.professional_id,
-      service_id: payload.service_id,
-      scheduled_at: scheduledAt.toISOString(),
-      ends_at: endsAt.toISOString(),
-      notes: payload.notes ?? null,
-      status: 'confirmed',
-      source: 'dashboard',
-    })
-    .select()
-    .single()
+  const result = await response.json() as {
+    success: boolean
+    appointment_id?: string
+    notifications_queued?: number
+    error?: string
+  }
 
-  if (error) throw new Error(error.message)
-  return data
-  /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
+  if (!response.ok || !result.success) {
+    throw new Error(result.error ?? 'Erro ao criar agendamento')
+  }
+
+  return result
 }
 
 // Atualiza status de um agendamento

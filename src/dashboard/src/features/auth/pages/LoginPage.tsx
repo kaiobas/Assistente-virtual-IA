@@ -8,6 +8,7 @@ import { ROUTES } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -18,7 +19,6 @@ type LoginForm = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const {
@@ -30,14 +30,13 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (data: LoginForm) => {
-    setError(null)
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
     })
     if (error) {
-      setError(error.message)
+      toast.error('Email ou senha incorretos.')
     } else {
       void navigate(ROUTES.DASHBOARD)
     }
@@ -80,12 +79,6 @@ export default function LoginPage() {
               <p className="text-xs text-destructive">{errors.password.message}</p>
             )}
           </div>
-
-          {error && (
-            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {error}
-            </p>
-          )}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar'}

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Bot, BotOff, Phone, RefreshCw } from 'lucide-react'
+import { Bot, BotOff, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -17,7 +17,7 @@ interface ConversationPanelProps {
 }
 
 export function ConversationPanel({ session }: ConversationPanelProps) {
-  const { data: messages, isLoading, refetch } = useSessionMessages(session.id)
+  const { data: messages, isLoading } = useSessionMessages(session.id)
   const updateStatus = useUpdateSessionStatus()
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -79,17 +79,6 @@ export function ConversationPanel({ session }: ConversationPanelProps) {
 
         {/* Ações */}
         <div className="flex items-center gap-2">
-          {/* Atualizar mensagens */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => void refetch()}
-            title="Atualizar mensagens"
-          >
-            <RefreshCw size={14} />
-          </Button>
-
           {/* Human takeover */}
           {isActive && (
             <Button

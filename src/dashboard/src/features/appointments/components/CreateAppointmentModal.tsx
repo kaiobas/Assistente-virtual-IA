@@ -138,8 +138,11 @@ export function CreateAppointmentModal({ open, onClose }: CreateAppointmentModal
               value={watch('professionalId') ?? ''}
               onValueChange={(v) => { if (v !== null) setValue('professionalId', v) }}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione..." />
+              <SelectTrigger className="w-full">
+                {watch('professionalId')
+                  ? <span className="flex-1 text-left text-sm">{professionals?.find(p => p.id === watch('professionalId'))?.display_name ?? 'Selecione...'}</span>
+                  : <SelectValue placeholder="Selecione..." />
+                }
               </SelectTrigger>
               <SelectContent>
                 {professionals?.map((p) => (
@@ -161,8 +164,11 @@ export function CreateAppointmentModal({ open, onClose }: CreateAppointmentModal
               value={watch('serviceId') ?? ''}
               onValueChange={(v) => { if (v !== null) setValue('serviceId', v) }}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione..." />
+              <SelectTrigger className="w-full">
+                {watch('serviceId')
+                  ? <span className="flex-1 text-left text-sm">{services?.find(s => s.id === watch('serviceId'))?.name ?? 'Selecione...'}</span>
+                  : <SelectValue placeholder="Selecione..." />
+                }
               </SelectTrigger>
               <SelectContent>
                 {services?.map((s) => (

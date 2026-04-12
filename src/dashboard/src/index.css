@@ -3,85 +3,92 @@
 /* ─── Fonte Mac-like + escala de texto aumentada ─── */
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;
-  --text-xs:   0.8125rem;   /* 13px (era 12px) */
-  --text-sm:   0.9375rem;   /* 15px (era 14px) */
-  --text-base: 1.0625rem;   /* 17px (era 16px) */
-  --text-lg:   1.1875rem;   /* 19px (era 18px) */
-  --text-xl:   1.3125rem;   /* 21px (era 20px) */
-  --text-2xl:  1.5625rem;   /* 25px (era 24px) */
+  --text-xs:   0.8125rem;
+  --text-sm:   0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg:   1.1875rem;
+  --text-xl:   1.3125rem;
+  --text-2xl:  1.5625rem;
 }
 
-/* ─── Variáveis CSS brutas (valores HSL sem hsl()) ─── */
+/* ─── Tokens light ─── */
 :root {
-  /* Tema primário */
-  --primary: 217 91% 60%;
+  /* Azul vivo — #2563EB / Tailwind blue-600 */
+  --primary:            221 83% 53%;
   --primary-foreground: 0 0% 100%;
 
-  /* Sidebar */
-  --sidebar-bg: 220 47% 25%;
-  --sidebar-text: 214 32% 91%;
-  --sidebar-active-bg: 217 91% 60%;
-  --sidebar-active-text: 0 0% 100%;
-  --sidebar-hover-bg: 220 47% 30%;
-  --sidebar-width: 256px;
-  --sidebar-collapsed-width: 68px;
+  /* Sidebar: branca com borda direita sutil */
+  --sidebar-bg:              0 0% 100%;
+  --sidebar-border:          214 32% 91%;
+  --sidebar-text:            215 25% 40%;
+  --sidebar-active-bg:       221 83% 53%;
+  --sidebar-active-text:     0 0% 100%;
+  --sidebar-hover-bg:        221 83% 97%;
+  --sidebar-hover-text:      221 83% 45%;
+  --sidebar-section-label:   215 16% 60%;
+  --sidebar-width:           248px;
+  --sidebar-collapsed-width: 64px;
 
-  /* Base shadcn */
-  --background: 0 0% 98%;
-  --foreground: 222 47% 11%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --destructive: 0 84% 60%;
+  /* Superfícies */
+  --background:         220 20% 97%;   /* cinza-azulado levíssimo */
+  --foreground:         222 39% 12%;
+  --card:               0 0% 100%;
+  --card-foreground:    222 39% 12%;
+  --popover:            0 0% 100%;
+  --popover-foreground: 222 39% 12%;
+
+  /* Estados neutros */
+  --secondary:          220 14% 94%;
+  --secondary-foreground: 222 39% 12%;
+  --muted:              220 14% 94%;
+  --muted-foreground:   215 16% 52%;
+  --accent:             221 83% 97%;
+  --accent-foreground:  221 83% 40%;
+
+  /* Bordas e inputs */
+  --border:             220 13% 88%;
+  --input:              220 13% 88%;
+  --ring:               221 83% 53%;
+  --radius:             0.625rem;
+
+  /* Destrutivo */
+  --destructive:        0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 217 91% 60%;
-  --radius: 0.5rem;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
 }
 
-/* ─── Mapeamento Tailwind v4: gera bg-*, text-*, border-* etc. ─── */
+/* ─── Mapeamento Tailwind v4 ─── */
 @theme inline {
-  --color-background:         hsl(var(--background));
-  --color-foreground:         hsl(var(--foreground));
-  --color-card:               hsl(var(--card));
-  --color-card-foreground:    hsl(var(--card-foreground));
-  --color-popover:            hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary:            hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary:          hsl(var(--secondary));
+  --color-background:           hsl(var(--background));
+  --color-foreground:           hsl(var(--foreground));
+  --color-card:                 hsl(var(--card));
+  --color-card-foreground:      hsl(var(--card-foreground));
+  --color-popover:              hsl(var(--popover));
+  --color-popover-foreground:   hsl(var(--popover-foreground));
+  --color-primary:              hsl(var(--primary));
+  --color-primary-foreground:   hsl(var(--primary-foreground));
+  --color-secondary:            hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted:              hsl(var(--muted));
-  --color-muted-foreground:   hsl(var(--muted-foreground));
-  --color-accent:             hsl(var(--accent));
-  --color-accent-foreground:  hsl(var(--accent-foreground));
-  --color-destructive:        hsl(var(--destructive));
+  --color-muted:                hsl(var(--muted));
+  --color-muted-foreground:     hsl(var(--muted-foreground));
+  --color-accent:               hsl(var(--accent));
+  --color-accent-foreground:    hsl(var(--accent-foreground));
+  --color-destructive:          hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border:             hsl(var(--border));
-  --color-input:              hsl(var(--input));
-  --color-ring:               hsl(var(--ring));
+  --color-border:               hsl(var(--border));
+  --color-input:                hsl(var(--input));
+  --color-ring:                 hsl(var(--ring));
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
 }
 
 @layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
+  * { border-color: hsl(var(--border)); }
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
-    font-size: 0.9375rem; /* 15px — garante base mesmo sem classe text-* */
+    font-size: 0.9375rem;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -89,29 +96,36 @@
 }
 
 .sidebar-transition {
-  transition: width 200ms ease;
+  transition: width 200ms cubic-bezier(.4,0,.2,1);
 }
 
 /* ─── Tema escuro ─── */
 .dark {
-  --background:    222 47% 8%;
-  --foreground:    210 40% 96%;
-  --card:          222 47% 11%;
-  --card-foreground: 210 40% 96%;
-  --popover:       222 47% 11%;
-  --popover-foreground: 210 40% 96%;
-  --secondary:     217 33% 17%;
-  --secondary-foreground: 210 40% 96%;
-  --muted:         217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-  --accent:        217 33% 17%;
-  --accent-foreground: 210 40% 96%;
+  --background:    224 27% 9%;
+  --foreground:    213 31% 91%;
+  --card:          224 27% 12%;
+  --card-foreground: 213 31% 91%;
+  --popover:       224 27% 12%;
+  --popover-foreground: 213 31% 91%;
+  --secondary:     220 24% 17%;
+  --secondary-foreground: 213 31% 91%;
+  --muted:         220 24% 17%;
+  --muted-foreground: 215 20% 58%;
+  --accent:        221 30% 20%;
+  --accent-foreground: 221 83% 72%;
   --destructive:   0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --border:        217 33% 18%;
-  --input:         217 33% 18%;
-  --ring:          217 91% 60%;
-  /* Sidebar fica um tom ainda mais escuro no dark mode */
-  --sidebar-bg:         220 47% 12%;
-  --sidebar-hover-bg:   220 47% 16%;
+  --border:        220 24% 18%;
+  --input:         220 24% 18%;
+  --ring:          221 83% 58%;
+
+  /* Sidebar escura */
+  --sidebar-bg:           224 27% 11%;
+  --sidebar-border:       220 24% 17%;
+  --sidebar-text:         215 20% 58%;
+  --sidebar-active-bg:    221 83% 53%;
+  --sidebar-active-text:  0 0% 100%;
+  --sidebar-hover-bg:     220 24% 17%;
+  --sidebar-hover-text:   213 31% 91%;
+  --sidebar-section-label: 215 20% 45%;
 }

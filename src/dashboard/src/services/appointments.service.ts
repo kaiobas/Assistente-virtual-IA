@@ -95,35 +95,85 @@ export interface CreateAppointmentPayload {
   notes?: string
 }
 
-// Cria agendamento via Edge Function (com validação de disponibilidade)
+// Cria agendamento com validação de disponibilidade e detecção de conflitos
 export async function createAppointment(payload: CreateAppointmentPayload) {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) throw new Error('Não autenticado')
+  const { client_id, professional_id, service_id, scheduled_at, notes } = payload
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-  const url = `${supabaseUrl}/functions/v1/create-appointment`
+  // ── Validação básica ──────────────────────────────────────────────────────
+  const scheduledAtDate = new Date(scheduled_at)
+  if (isNaN(scheduledAtDate.getTime())) throw new Error('Data/hora inválida')
+  if (scheduledAtDate < new Date()) throw new Error('Não é possível agendar no passado')
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify(payload),
-  })
+  // ── Busca duração do serviço ──────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: service, error: svcErr } = await (supabase as any)
+    .from('services')
+    .select('duration_min, name')
+    .eq('id', service_id)
+    .eq('active', true)
+    .single() as { data: { duration_min: number; name: string } | null; error: unknown }
 
-  const result = await response.json() as {
-    success: boolean
-    appointment_id?: string
-    notifications_queued?: number
-    error?: string
+  if (svcErr || !service) throw new Error('Serviço não encontrado ou inativo')
+
+  const endsAt = new Date(scheduledAtDate.getTime() + service.duration_min * 60 * 1000)
+
+  // ── Verifica sobreposição de horário ──────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: overlapping } = await (supabase as any)
+    .from('appointments')
+    .select('id, scheduled_at, ends_at')
+    .eq('professional_id', professional_id)
+    .not('status', 'in', '(cancelled_by_client,cancelled_by_business,cancelled_auto,no_show)')
+    .lt('scheduled_at', endsAt.toISOString())
+    .gt('ends_at', scheduledAtDate.toISOString()) as {
+      data: Array<{ id: string; scheduled_at: string; ends_at: string }> | null
+    }
+
+  if (overlapping && overlapping.length > 0) {
+    const conflict = overlapping[0]
+    const start = new Date(conflict.scheduled_at).toLocaleTimeString('pt-BR', {
+      hour: '2-digit', minute: '2-digit',
+    })
+    const end = new Date(conflict.ends_at).toLocaleTimeString('pt-BR', {
+      hour: '2-digit', minute: '2-digit',
+    })
+    throw new Error(
+      `Horário indisponível — o profissional já tem agendamento das ${start} às ${end}`
+    )
   }
 
-  if (!response.ok || !result.success) {
-    throw new Error(result.error ?? 'Erro ao criar agendamento')
+  // ── Busca business_id ─────────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: businessUser } = await (supabase as any)
+    .from('business_users')
+    .select('business_id')
+    .single() as { data: { business_id: string } | null }
+
+  if (!businessUser) throw new Error('Negócio não encontrado')
+
+  // ── Cria o agendamento ────────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: appointment, error: apptErr } = await (supabase as any)
+    .from('appointments')
+    .insert({
+      business_id: businessUser.business_id,
+      client_id,
+      professional_id,
+      service_id,
+      scheduled_at: scheduledAtDate.toISOString(),
+      ends_at: endsAt.toISOString(),
+      notes: notes ?? null,
+      status: 'confirmed',
+      source: 'dashboard',
+    })
+    .select('id')
+    .single() as { data: { id: string } | null; error: { message: string } | null }
+
+  if (apptErr ?? !appointment) {
+    throw new Error(`Erro ao criar agendamento: ${apptErr?.message ?? 'desconhecido'}`)
   }
 
-  return result
+  return { success: true, appointment_id: appointment!.id, notifications_queued: 0 }
 }
 
 // Atualiza status de um agendamento

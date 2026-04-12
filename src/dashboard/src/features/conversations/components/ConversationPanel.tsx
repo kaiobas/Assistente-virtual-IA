@@ -118,39 +118,41 @@ export function ConversationPanel({ session }: ConversationPanelProps) {
       )}
 
       {/* Área de mensagens */}
-      <ScrollArea className="flex-1 px-5 py-4">
-        {isLoading && (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className={`flex ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'} gap-2`}
-              >
-                <Skeleton className="w-7 h-7 rounded-full flex-shrink-0" />
-                <Skeleton
-                  className={`h-16 rounded-2xl ${i % 2 === 0 ? 'w-2/3' : 'w-1/2'}`}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="px-5 py-4">
+          {isLoading && (
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`flex ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'} gap-2`}
+                >
+                  <Skeleton className="w-7 h-7 rounded-full flex-shrink-0" />
+                  <Skeleton
+                    className={`h-16 rounded-2xl ${i % 2 === 0 ? 'w-2/3' : 'w-1/2'}`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
-        {!isLoading && (!messages || messages.length === 0) && (
-          <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-            <p className="text-sm text-muted-foreground">
-              Nenhuma mensagem nesta conversa
-            </p>
-          </div>
-        )}
+          {!isLoading && (!messages || messages.length === 0) && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-sm text-muted-foreground">
+                Nenhuma mensagem nesta conversa
+              </p>
+            </div>
+          )}
 
-        {!isLoading && messages && messages.length > 0 && (
-          <>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
-            ))}
-            <div ref={bottomRef} />
-          </>
-        )}
+          {!isLoading && messages && messages.length > 0 && (
+            <>
+              {messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              <div ref={bottomRef} />
+            </>
+          )}
+        </div>
       </ScrollArea>
 
       {/* Footer informativo — dashboard é somente leitura */}

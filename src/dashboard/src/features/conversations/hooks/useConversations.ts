@@ -11,12 +11,11 @@ import {
   type SessionStatus,
 } from '@/services/conversations.service'
 
-// Lista de sessões — polling leve, sessões mudam com menos frequência
+// Lista de sessões — Realtime via RealtimeProvider (rt:conversation_sessions)
 export function useConversationSessions(filters: ConversationFilters = {}) {
   return useQuery({
     queryKey: [QUERY_KEYS.CONVERSATIONS, filters],
     queryFn: () => getConversationSessions(filters),
-    refetchInterval: 1000 * 30,
   })
 }
 

@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/lib/constants'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Toaster } from '@/components/ui/sonner'
+import { RealtimeProvider } from '@/lib/RealtimeProvider'
 
 // Páginas — lazy load por rota
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
@@ -43,8 +44,9 @@ function AppRoutes() {
   }
 
   return (
-    <AppLayout>
-      <Suspense fallback={<div>Carregando...</div>}>
+    <RealtimeProvider>
+      <AppLayout>
+        <Suspense fallback={<div>Carregando...</div>}>
         <Routes>
           <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
           <Route path={ROUTES.APPOINTMENTS} element={<AppointmentsPage />} />
@@ -57,7 +59,8 @@ function AppRoutes() {
           <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
         </Routes>
       </Suspense>
-    </AppLayout>
+      </AppLayout>
+    </RealtimeProvider>
   )
 }
 

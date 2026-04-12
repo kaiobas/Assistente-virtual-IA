@@ -15,7 +15,6 @@ export function useNotificationMetrics() {
   return useQuery({
     queryKey: [QUERY_KEYS.NOTIFICATIONS, 'metrics'],
     queryFn: getNotificationMetrics,
-    refetchInterval: 1000 * 60,
   })
 }
 
@@ -23,7 +22,6 @@ export function useNotificationQueue(filters: NotificationFilters = {}) {
   return useQuery({
     queryKey: [QUERY_KEYS.NOTIFICATIONS, 'queue', filters],
     queryFn: () => getNotificationQueue(filters),
-    refetchInterval: 1000 * 30,
   })
 }
 

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 interface PageWrapperProps {
-  title: string
+  title: ReactNode
   description?: string
   /** Ação no canto superior direito (ex: botão "Novo agendamento") */
   action?: ReactNode
@@ -20,11 +20,11 @@ export function PageWrapper({ title, description, action, actions, children, cla
   const rightSlot = action ?? actions
   return (
     <div className={cn('flex flex-col gap-6', className)}>
-      <div className="flex items-start justify-between">
+      <div className="flex items-center justify-between pb-5 border-b">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
           {description && (
-            <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+            <p className="text-sm text-muted-foreground mt-1">{description}</p>
           )}
         </div>
         {rightSlot && <div className="flex-shrink-0">{rightSlot}</div>}

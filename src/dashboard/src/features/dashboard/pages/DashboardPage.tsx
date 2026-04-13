@@ -4,14 +4,41 @@ import { MetricCard } from '../components/MetricCard'
 import { AppointmentsChart } from '../components/AppointmentsChart'
 import { UpcomingAppointments } from '../components/UpcomingAppointments'
 import { useDayMetrics } from '../hooks/useDashboard'
+import { useBusiness } from '@/features/settings/hooks/useSettings'
+import { useAuthStore } from '@/store/auth.store'
+
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Bom dia'
+  if (hour < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
+function getFirstName(email: string) {
+  const local = email.split('@')[0] ?? ''
+  const name = local.split(/[._\-+]/)[0] ?? local
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
 
 export default function DashboardPage() {
   const { data: metrics, isLoading } = useDayMetrics()
+  const { data: business } = useBusiness()
+  const { user } = useAuthStore()
+
+  const greeting = getGreeting()
+  const name = business?.owner_name?.trim() ||
+    (user?.email ? getFirstName(user.email) : null)
 
   return (
     <PageWrapper
-      title="Overview"
-      description="Resumo do dia de hoje"
+      title={
+        <span>
+          {greeting}{name ? (
+            <>, <span className="text-foreground">{name}</span></>
+          ) : null} 👋
+        </span>
+      }
+      description="Aqui está o resumo do seu dia"
     >
       {/* Cards de métricas */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">

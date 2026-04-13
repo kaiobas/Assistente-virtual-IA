@@ -8,6 +8,7 @@ export interface Business {
   timezone: string
   agent_name: string
   agent_persona: string | null
+  owner_name: string | null
   business_rules: Record<string, unknown>
   modules_enabled: Record<string, boolean>
   active: boolean
@@ -20,6 +21,7 @@ export interface UpdateBusinessPayload {
   timezone?: string
   agent_name?: string
   agent_persona?: string
+  owner_name?: string
   business_rules?: Record<string, unknown>
 }
 

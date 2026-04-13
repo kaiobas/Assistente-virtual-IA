@@ -223,10 +223,22 @@ function AgentTab() {
 // ─── Aba Conta ────────────────────────────────────────────────────────────────
 function AccountTab() {
   const { user } = useAuthStore()
+  const { data: business, isLoading } = useBusiness()
+  const updateBusiness = useUpdateBusiness()
+
+  const [displayName, setDisplayName] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (business) setDisplayName(business.owner_name ?? '')
+  }, [business])
+
+  function handleSaveName() {
+    void updateBusiness.mutateAsync({ owner_name: displayName.trim() || undefined })
+  }
 
   function handleChangePassword() {
     setError(null)
@@ -258,14 +270,45 @@ function AccountTab() {
     )
   }
 
+  if (isLoading) return <Skeleton className="h-64 w-full rounded-xl" />
+
+  const isNameDirty = displayName !== (business?.owner_name ?? '')
+
   return (
     <div className="space-y-6 max-w-lg">
+      {/* Nome de exibição */}
+      <div className="space-y-4 p-4 border rounded-xl">
+        <div>
+          <p className="text-sm font-medium">Nome de exibição</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Aparece na mensagem de boas-vindas do painel.
+          </p>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Seu nome</Label>
+          <Input
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Ex: João, Maria, Equipe..."
+          />
+        </div>
+        <Button
+          onClick={handleSaveName}
+          disabled={!isNameDirty || updateBusiness.isPending}
+          className="gap-1.5"
+        >
+          {updateBusiness.isPending ? 'Salvando...' : 'Salvar nome'}
+        </Button>
+      </div>
+
+      {/* Email */}
       <div className="space-y-1.5">
         <Label>Email</Label>
         <Input value={user?.email ?? ''} disabled className="bg-muted" />
         <p className="text-xs text-muted-foreground">Para alterar o email, contate o suporte.</p>
       </div>
 
+      {/* Alterar senha */}
       <div className="space-y-4 p-4 border rounded-xl">
         <p className="text-sm font-medium">Alterar senha</p>
 

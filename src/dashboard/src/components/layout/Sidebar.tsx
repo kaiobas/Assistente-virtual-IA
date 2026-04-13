@@ -4,7 +4,7 @@ import {
   CalendarDays,
   Users,
   MessageSquare,
-  Scissors,
+  UserCog,
   Briefcase,
   Bell,
   Settings,
@@ -39,7 +39,7 @@ const NAV_SECTIONS = [
     id: 'business',
     label: 'Negócio',
     items: [
-      { label: 'Profissionais', icon: Scissors,  path: ROUTES.PROFESSIONALS },
+      { label: 'Profissionais', icon: UserCog,  path: ROUTES.PROFESSIONALS },
       { label: 'Serviços',      icon: Briefcase, path: ROUTES.SERVICES },
       { label: 'Notificações',  icon: Bell,      path: ROUTES.NOTIFICATIONS },
     ],
@@ -64,19 +64,19 @@ export function Sidebar() {
   return (
     <TooltipProvider delay={0}>
       <aside
-        className="sidebar-transition flex flex-col h-screen fixed left-0 top-0 z-40"
+        className="sidebar-transition flex flex-col h-screen fixed left-0 top-0 z-40 border-r"
         style={{
           width: sidebarCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
           background: 'hsl(var(--sidebar-bg))',
-          borderRight: '1px solid rgba(255,255,255,0.07)',
+          borderColor: 'hsl(var(--sidebar-border))',
         }}
       >
         {/* Header: Logo + Toggle */}
         <div
-          className="flex items-center h-16 flex-shrink-0"
+          className="flex items-center h-16 flex-shrink-0 border-b"
           style={{
-            padding: sidebarCollapsed ? '0 10px' : '0 12px 0 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            borderColor: 'hsl(var(--sidebar-border))',
+            padding: sidebarCollapsed ? '0 12px' : '0 14px 0 18px',
             justifyContent: sidebarCollapsed ? 'center' : 'space-between',
           }}
         >
@@ -84,26 +84,26 @@ export function Sidebar() {
             <>
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm text-white"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm text-white shadow-sm"
                   style={{ background: 'hsl(var(--sidebar-active-bg))' }}
                 >
                   A
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm leading-tight text-white truncate">
+                  <p className="font-semibold text-sm leading-tight text-foreground truncate">
                     Assistente IA
                   </p>
-                  <p className="text-[0.6875rem] leading-tight text-white/45 truncate">
+                  <p className="text-[0.6875rem] leading-tight text-muted-foreground truncate">
                     Painel de Controle
                   </p>
                 </div>
               </div>
               <button
                 onClick={toggleSidebar}
-                className="w-7 h-7 rounded-md flex items-center justify-center text-white/40 hover:text-white/75 hover:bg-white/8 transition-colors flex-shrink-0"
+                className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
                 aria-label="Recolher menu"
               >
-                <PanelLeftClose size={17} />
+                <PanelLeftClose size={16} />
               </button>
             </>
           ) : (
@@ -112,11 +112,11 @@ export function Sidebar() {
                 render={
                   <button
                     onClick={toggleSidebar}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm text-white transition-opacity hover:opacity-80"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-sm transition-opacity hover:opacity-85"
                     style={{ background: 'hsl(var(--sidebar-active-bg))' }}
                     aria-label="Expandir menu"
                   >
-                    <PanelLeftOpen size={17} className="text-white" />
+                    <PanelLeftOpen size={16} className="text-white" />
                   </button>
                 }
               />
@@ -126,15 +126,18 @@ export function Sidebar() {
         </div>
 
         {/* Navegação principal */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2">
-          {NAV_SECTIONS.map((section, i) => (
-            <div key={section.id} className={cn(i > 0 && 'mt-4')}>
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.id}>
               {!sidebarCollapsed ? (
-                <p className="px-3 mb-1.5 text-[0.6875rem] font-semibold uppercase tracking-widest text-white/35 select-none">
+                <p
+                  className="px-2 mb-1.5 text-[0.6875rem] font-semibold uppercase tracking-widest select-none"
+                  style={{ color: 'hsl(var(--sidebar-section-label))' }}
+                >
                   {section.label}
                 </p>
               ) : (
-                i > 0 && <div className="h-px mx-1 mb-3 bg-white/10" />
+                <div className="h-px mx-1 mb-3" style={{ background: 'hsl(var(--sidebar-border))' }} />
               )}
               <div className="space-y-0.5">
                 {section.items.map((item) => (
@@ -146,10 +149,7 @@ export function Sidebar() {
         </nav>
 
         {/* Navegação inferior */}
-        <div
-          className="py-2 px-2 space-y-0.5"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
-        >
+        <div className="py-3 px-3 space-y-0.5 border-t" style={{ borderColor: 'hsl(var(--sidebar-border))' }}>
           {BOTTOM_ITEMS.map((item) => (
             <NavItem key={item.path} item={item} collapsed={sidebarCollapsed} />
           ))}
@@ -159,11 +159,15 @@ export function Sidebar() {
                 <button
                   onClick={() => void handleLogout()}
                   className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-150 text-white/50 hover:bg-white/7 hover:text-white/80',
-                    sidebarCollapsed && 'justify-center px-2'
+                    'w-full flex items-center gap-2.5 rounded-lg transition-colors duration-150',
+                    'text-muted-foreground hover:text-foreground',
+                    sidebarCollapsed ? 'justify-center p-2.5' : 'px-3 py-2.5',
                   )}
+                  style={{ ['--hover-bg' as string]: 'hsl(var(--sidebar-hover-bg))' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'hsl(var(--sidebar-hover-bg))' }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '' }}
                 >
-                  <LogOut size={20} className="flex-shrink-0" />
+                  <LogOut size={18} className="flex-shrink-0" />
                   {!sidebarCollapsed && <span className="text-sm">Sair</span>}
                 </button>
               }
@@ -192,20 +196,32 @@ function NavItem({ item, collapsed }: NavItemProps) {
           <NavLink
             to={path}
             className={cn(
-              'relative flex items-center gap-3 py-2.5 rounded-lg transition-colors duration-150',
-              collapsed ? 'justify-center px-2' : 'px-3',
-              isActive
-                ? 'bg-white/12 text-white font-medium'
-                : 'text-white/60 hover:bg-white/7 hover:text-white/85'
+              'relative flex items-center gap-2.5 rounded-lg transition-all duration-150',
+              collapsed ? 'justify-center p-2.5' : 'px-3 py-2.5',
             )}
+            style={isActive
+              ? {
+                  background: 'hsl(var(--sidebar-active-bg))',
+                  color: 'hsl(var(--sidebar-active-text))',
+                  fontWeight: '500',
+                  boxShadow: '0 1px 3px hsl(var(--sidebar-active-bg) / 40%)',
+                }
+              : { color: 'hsl(var(--sidebar-text))' }
+            }
+            onMouseEnter={(e) => {
+              if (!isActive) {
+                (e.currentTarget as HTMLElement).style.background = 'hsl(var(--sidebar-hover-bg))'
+                ;(e.currentTarget as HTMLElement).style.color = 'hsl(var(--sidebar-hover-text))'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive) {
+                (e.currentTarget as HTMLElement).style.background = ''
+                ;(e.currentTarget as HTMLElement).style.color = 'hsl(var(--sidebar-text))'
+              }
+            }}
           >
-            {isActive && !collapsed && (
-              <span
-                className="absolute left-0 inset-y-2 w-[3px] rounded-r-full"
-                style={{ background: 'hsl(var(--sidebar-active-bg))' }}
-              />
-            )}
-            <Icon size={20} className="flex-shrink-0" />
+            <Icon size={18} className="flex-shrink-0" />
             {!collapsed && <span className="text-sm">{label}</span>}
           </NavLink>
         }
@@ -214,3 +230,4 @@ function NavItem({ item, collapsed }: NavItemProps) {
     </Tooltip>
   )
 }
+

@@ -19,12 +19,13 @@ export function AppLayout({ children }: AppLayoutProps) {
       <Sidebar />
       <Topbar />
       <main
-        className="pt-16 min-h-screen transition-all duration-200"
+        className="pt-14 min-h-screen transition-all"
         style={{
           marginLeft: sidebarCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
+          transition: 'margin-left 200ms cubic-bezier(.4,0,.2,1)',
         }}
       >
-        <div className="p-6">
+        <div className="p-8">
           {children}
         </div>
       </main>

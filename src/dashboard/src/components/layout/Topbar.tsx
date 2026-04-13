@@ -33,15 +33,15 @@ export function Topbar() {
 
   return (
     <header
-      className="fixed top-0 right-0 z-30 h-16 flex items-center justify-between px-6 border-b bg-card"
+      className="fixed top-0 right-0 z-30 h-14 flex items-center justify-between px-5 border-b bg-card"
       style={{
         left: sidebarCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
-        transition: 'left 200ms ease',
+        transition: 'left 200ms cubic-bezier(.4,0,.2,1)',
       }}
     >
       <div id="topbar-title" />
 
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex items-center gap-2 ml-auto">
         {/* Toggle de tema */}
         <Button
           variant="ghost"
@@ -56,13 +56,13 @@ export function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition-colors outline-none">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+              <button className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-muted transition-colors outline-none">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-xs font-semibold bg-primary text-primary-foreground">
                     {user?.email ? getInitials(user.email) : 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm text-muted-foreground hidden sm:block">
+                <span className="text-sm font-medium hidden sm:block">
                   {user?.email}
                 </span>
               </button>

@@ -4,6 +4,7 @@ import {
   getNotificationQueue,
   getNotificationLog,
   cancelNotification,
+  dispatchNotification,
   getNotificationMetrics,
   getNotificationSettings,
   updateNotificationSetting,
@@ -42,6 +43,20 @@ export function useCancelNotification() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Erro ao cancelar notificação')
+    },
+  })
+}
+
+export function useDispatchNotification() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => dispatchNotification(id),
+    onSuccess: () => {
+      toast.success('Notificação disparada com sucesso!')
+      void qc.invalidateQueries({ queryKey: [QUERY_KEYS.NOTIFICATIONS] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao disparar notificação')
     },
   })
 }

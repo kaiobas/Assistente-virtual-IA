@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { XCircle, Clock, RefreshCw } from 'lucide-react'
+import { XCircle, Clock, RefreshCw, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { NotificationTypeBadge, NotificationStatusBadge } from './NotificationTypeBadge'
-import { useNotificationQueue, useCancelNotification } from '../hooks/useNotifications'
+import { useNotificationQueue, useCancelNotification, useDispatchNotification } from '../hooks/useNotifications'
 
 const STATUS_OPTIONS = [
   { label: 'Todos os status', value: 'all' },
@@ -51,6 +51,7 @@ export function QueueTab() {
     pageSize: PAGE_SIZE,
   })
   const cancel = useCancelNotification()
+  const dispatch = useDispatchNotification()
 
   const items = data?.data ?? []
   const total = data?.count ?? 0
@@ -116,7 +117,7 @@ export function QueueTab() {
               </th>
               <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Status</th>
               <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Tentativas</th>
-              <th className="px-4 py-3 w-10" />
+              <th className="px-4 py-3 w-20" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -164,37 +165,64 @@ export function QueueTab() {
                 </td>
                 <td className="px-4 py-3">
                   {item.status === 'pending' && (
-                    <AlertDialog>
-                      <AlertDialogTrigger
-                        render={
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 text-destructive"
-                            title="Cancelar notificação"
-                          >
-                            <XCircle size={14} />
-                          </Button>
-                        }
-                      />
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Cancelar notificação?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            A notificação não será enviada ao cliente. Essa ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Voltar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => cancel.mutate(item.id)}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            Cancelar notificação
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <div className="flex items-center gap-1">
+                      {/* Disparar agora */}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-primary"
+                        title="Disparar agora"
+                        disabled={dispatch.isPending}
+                        onClick={() => dispatch.mutate(item.id)}
+                      >
+                        <Send size={14} />
+                      </Button>
+
+                      {/* Cancelar */}
+                      <AlertDialog>
+                        <AlertDialogTrigger
+                          render={
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-destructive"
+                              title="Cancelar notificação"
+                            >
+                              <XCircle size={14} />
+                            </Button>
+                          }
+                        />
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancelar notificação?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              A notificação não será enviada ao cliente. Essa ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Voltar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => cancel.mutate(item.id)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Cancelar notificação
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
+                  {item.status === 'failed' && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-amber-500"
+                      title="Tentar novamente"
+                      disabled={dispatch.isPending}
+                      onClick={() => dispatch.mutate(item.id)}
+                    >
+                      <RefreshCw size={14} />
+                    </Button>
                   )}
                 </td>
               </tr>

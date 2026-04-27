@@ -126,6 +126,75 @@ export interface NotificationSetting {
   advance_hours: number
 }
 
+export async function dispatchNotification(queueId: string): Promise<void> {
+  // 1. Fetch queue item with all necessary joins
+  const { data: item, error: fetchError } = await supabase
+    .from('notification_queue')
+    .select(
+      `id, type, send_at, status, attempts,
+       appointment_id, client_id,
+       clients(name, phone),
+       appointments(scheduled_at, services(name))`,
+    )
+    .eq('id', queueId)
+    .single()
+
+  if (fetchError || !item) throw new Error(fetchError?.message ?? 'Notificação não encontrada')
+
+  // 2. Build webhook payload
+  const payload = {
+    queue_id:       item.id,
+    type:           item.type,
+    appointment_id: (item as Record<string, unknown>)['appointment_id'],
+    client_id:      (item as Record<string, unknown>)['client_id'],
+    client_name:    (item as { clients?: { name?: string | null } | null }).clients?.name ?? null,
+    client_phone:   (item as { clients?: { phone?: string } | null }).clients?.phone ?? null,
+    scheduled_at:   (item as { appointments?: { scheduled_at?: string } | null }).appointments?.scheduled_at ?? null,
+    service_name:   (item as { appointments?: { services?: { name?: string } | null } | null }).appointments?.services?.name ?? null,
+    send_at:        item.send_at,
+  }
+
+  // 3. Call Edge Function (server-side) — avoids CORS when calling the n8n webhook directly
+  let success = false
+  let errorMsg: string | null = null
+
+  try {
+    const { error: fnError } = await supabase.functions.invoke('dispatch-notification', {
+      body: payload,
+    })
+    if (fnError) throw fnError
+    success = true
+  } catch (err) {
+    errorMsg = err instanceof Error ? err.message : String(err)
+  }
+
+  // 4. Update queue status
+  /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+  await (supabase as any)
+    .from('notification_queue')
+    .update({
+      status:    success ? 'sent' : 'failed',
+      attempts:  (item.attempts ?? 0) + 1,
+    })
+    .eq('id', queueId)
+
+  // 5. Insert into notification_log
+  await (supabase as any)
+    .from('notification_log')
+    .insert({
+      queue_id:          queueId,
+      appointment_id:    (item as Record<string, unknown>)['appointment_id'],
+      channel:           'whatsapp',
+      message_body:      JSON.stringify(payload),
+      sent_at:           new Date().toISOString(),
+      delivery_status:   success ? 'sent' : 'failed',
+      error_message:     errorMsg,
+    })
+  /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+
+  if (!success) throw new Error(errorMsg ?? 'Falha ao disparar notificação')
+}
+
 export async function getNotificationSettings(): Promise<NotificationSetting[]> {
   const { data, error } = await supabase
     .from('notification_settings')

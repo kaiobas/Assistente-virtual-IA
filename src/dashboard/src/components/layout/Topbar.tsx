@@ -1,3 +1,4 @@
+import tituloSrc from '@/assets/titulo.png'
 import { useAuthStore } from '@/store/auth.store'
 import { useUIStore } from '@/store/ui.store'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -39,7 +40,7 @@ export function Topbar() {
         transition: 'left 200ms cubic-bezier(.4,0,.2,1)',
       }}
     >
-      <div id="topbar-title" />
+      <img src={tituloSrc} alt="ATENDI" className="h-6 logo-theme" />
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Toggle de tema */}

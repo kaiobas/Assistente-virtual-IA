@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* ─── Dark mode via classe .dark no <html> ─── */
+@variant dark (&:where(.dark, .dark *));
 /* ─── Fonte Mac-like + escala de texto aumentada ─── */
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;
@@ -128,4 +130,11 @@
   --sidebar-hover-bg:     220 24% 17%;
   --sidebar-hover-text:   213 31% 91%;
   --sidebar-section-label: 215 20% 45%;
+}
+/* ─── Logo: escura por padrão → inverte no modo escuro para ficar branca ─── */
+.logo-theme {
+  filter: none;
+}
+.dark .logo-theme {
+  filter: invert(1);
 }

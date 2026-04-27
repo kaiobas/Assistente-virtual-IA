@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import logoCompleta from '@/assets/logo-completa.png'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -46,8 +47,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-sm space-y-6">
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Assistente Virtual IA</h1>
+        <div className="flex flex-col items-center gap-3">
+          <img src={logoCompleta} alt="ATENDI" className="h-40 w-auto logo-theme" />
           <p className="text-sm text-muted-foreground">Entre com sua conta para acessar o painel</p>
         </div>
 

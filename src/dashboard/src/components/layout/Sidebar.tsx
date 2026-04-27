@@ -10,7 +10,6 @@ import {
   Settings,
   LogOut,
   PanelLeftClose,
-  PanelLeftOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/constants'
@@ -23,6 +22,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import mascoteSrc from '@/assets/mascote.png'
+import tituloSrc from '@/assets/titulo.png'
 
 const NAV_SECTIONS = [
   {
@@ -82,21 +83,9 @@ export function Sidebar() {
         >
           {!sidebarCollapsed ? (
             <>
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm text-white shadow-sm"
-                  style={{ background: 'hsl(var(--sidebar-active-bg))' }}
-                >
-                  A
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm leading-tight text-foreground truncate">
-                    Assistente IA
-                  </p>
-                  <p className="text-[0.6875rem] leading-tight text-muted-foreground truncate">
-                    Painel de Controle
-                  </p>
-                </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <img src={mascoteSrc} alt="Atendi" className="h-9 w-9 flex-shrink-0" />
+                <img src={tituloSrc} alt="ATENDI" className="h-6 flex-shrink-0 logo-theme" />
               </div>
               <button
                 onClick={toggleSidebar}
@@ -112,11 +101,10 @@ export function Sidebar() {
                 render={
                   <button
                     onClick={toggleSidebar}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-sm transition-opacity hover:opacity-85"
-                    style={{ background: 'hsl(var(--sidebar-active-bg))' }}
+                    className="flex items-center justify-center transition-opacity hover:opacity-75"
                     aria-label="Expandir menu"
                   >
-                    <PanelLeftOpen size={16} className="text-white" />
+                    <img src={mascoteSrc} alt="Atendi" className="h-9 w-9" />
                   </button>
                 }
               />

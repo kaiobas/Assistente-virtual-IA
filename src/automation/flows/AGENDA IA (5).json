@@ -1,0 +1,947 @@
+{
+  "name": "AGENDA IA",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13ca244b-9004-4a6e-babc-a1a5b37ecd75",
+              "name": "business_id",
+              "value": "={{ $json.business_id }}",
+              "type": "string"
+            },
+            {
+              "id": "963ee272-bc66-47d2-b2e4-29f349cc7f80",
+              "name": "client_id",
+              "value": "={{ $json.client_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4d43b296-e78c-4906-88e4-370b929d9826",
+              "name": "intencao",
+              "value": "={{ $json.intencao }}",
+              "type": "string"
+            },
+            {
+              "id": "e010d6b2-4e4c-4c39-b4e0-8ed0b8b8092b",
+              "name": "nome_cliente",
+              "value": "={{ $json.nome_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "98b9ea95-d1d6-41a4-b685-cfb9e9220e82",
+              "name": "telefone_cliente",
+              "value": "={{ $json.telefone_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "b6960e4b-b32e-4204-b0bd-3ec4e13bcf27",
+              "name": "data_consulta_reuniao",
+              "value": "={{ $json.data_consulta_reuniao }}",
+              "type": "string"
+            },
+            {
+              "id": "666a72e5-29a9-46c0-a394-48874670b331",
+              "name": "nome_profissional",
+              "value": "={{ $json.nome_profissional }}",
+              "type": "string"
+            },
+            {
+              "id": "c88c8484-c184-4b2d-ae02-3de796d13036",
+              "name": "nome_servico",
+              "value": "={{ $json.nome_servico }}",
+              "type": "string"
+            },
+            {
+              "id": "d4cc197a-0b3c-40a8-a587-0c28e78d2324",
+              "name": "timezone",
+              "value": "={{ $json.timezone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3600,
+        2400
+      ],
+      "id": "2e3728b6-d22e-49fb-89ce-457b21f9994d",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "consultar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "93e9b62d-2dd0-4a25-a808-9c2313d35680"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "consultar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4b556220-b484-4c33-963f-cfe6434b1a17",
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "agendar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "agendar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ad39a7cf-c10c-4729-bd44-2950ecfd7576",
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "cancelar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancelar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "80fff743-2b17-4a74-b70d-a0ec6232d9cc",
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "consultar_agendamentos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "consultar_agendamentos"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3904,
+        2384
+      ],
+      "id": "6919bb78-1bee-4c94-89e2-de55802751c2",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name \nFROM professionals \nWHERE name ILIKE '%{{ $('When Executed by Another Workflow').item.json.nome_profissional }}%'\nAND business_id = '{{ $('When Executed by Another Workflow').item.json.business_id }}'\nAND active = true \nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4112,
+        1936
+      ],
+      "id": "13ae262e-3b72-413a-8d0e-9e9419dd2d89",
+      "name": "busca de profissional",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT start_time, end_time\nFROM availability_rules\nWHERE professional_id = '{{ $('busca de profissional').item.json.id }}'\nAND day_of_week = EXTRACT(DOW FROM (\n  '{{ $('When Executed by Another Workflow').item.json.data_consulta_reuniao }}'::timestamptz \n  AT TIME ZONE '{{ $('When Executed by Another Workflow').item.json.timezone }}'\n))\nAND active = true;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4544,
+        1936
+      ],
+      "id": "bd973f90-b67c-41b2-8755-52f2212bc735",
+      "name": "horários de funcionamento",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT scheduled_at, ends_at\nFROM appointments\nWHERE professional_id = '{{ $('busca de profissional').item.json.id }}'\nAND DATE(scheduled_at::timestamptz AT TIME ZONE '{{ $('When Executed by Another Workflow').item.json.timezone }}') = DATE('{{ $('When Executed by Another Workflow').item.json.data_consulta_reuniao }}'::timestamptz AT TIME ZONE '{{ $('When Executed by Another Workflow').item.json.timezone }}')\nAND status NOT IN ('cancelled_by_client', 'cancelled_by_business', 'cancelled_auto')\nORDER BY scheduled_at ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4752,
+        1936
+      ],
+      "id": "2395c6af-41e0-409b-96f2-d1179794749c",
+      "name": "agendamentos ocupados",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const timezone = $('When Executed by Another Workflow').item.json.timezone;\nconst dataDesejada = $('When Executed by Another Workflow').item.json.data_consulta_reuniao;\nconst agora = new Date();\n\n// Duração do serviço em minutos\nconst durationMin = $('duracao do servico').item.json.duration_min;\n// Quantos slots de 30min o serviço consome\nconst slotsNecessarios = Math.ceil(durationMin / 30);\n\n// Extrair offset da data recebida\nconst offsetMatch = dataDesejada.match(/([+-]\\d{2}):(\\d{2})$/);\nconst offsetHoras = offsetMatch ? parseInt(offsetMatch[1]) : 0;\nconst offsetMinutos = offsetMatch ? parseInt(offsetMatch[2]) : 0;\nconst offsetTotal = offsetHoras * 60 + (offsetHoras < 0 ? -offsetMinutos : offsetMinutos);\n\n// Pegar horários de funcionamento\nconst horarios = $('horários de funcionamento').all();\n\n// Pegar agendamentos ocupados\nlet ocupados = [];\ntry {\n  ocupados = $('agendamentos ocupados').all()\n    .filter(item => item.json.scheduled_at)\n    .map(item => ({\n      inicio: new Date(item.json.scheduled_at),\n      fim: new Date(item.json.ends_at)\n    }));\n} catch(e) {\n  ocupados = [];\n}\n\nconst dataBase = new Date(dataDesejada);\nconst slotsLivres = [];\n\nfor (const horario of horarios) {\n  const [hIni] = horario.json.start_time.split(':').map(Number);\n  const [hFim] = horario.json.end_time.split(':').map(Number);\n\n  let slotInicio = new Date(dataBase);\n  slotInicio.setUTCHours(hIni - (offsetTotal / 60), 0, 0, 0);\n\n  const fim = new Date(dataBase);\n  fim.setUTCHours(hFim - (offsetTotal / 60), 0, 0, 0);\n\n  while (slotInicio < fim) {\n    const slotFim = new Date(slotInicio);\n    slotFim.setUTCMinutes(slotFim.getUTCMinutes() + (slotsNecessarios * 30));\n\n    // Não ultrapassar fim do expediente\n    if (slotFim > fim) break;\n\n    // Verificar se está no futuro\n    if (slotInicio <= agora) {\n      slotInicio = new Date(slotInicio);\n      slotInicio.setUTCMinutes(slotInicio.getUTCMinutes() + 30);\n      continue;\n    }\n\n    // Verificar conflito com agendamentos\n    const ocupado = ocupados.some(ag =>\n      slotInicio < ag.fim && slotFim > ag.inicio\n    );\n\n    if (!ocupado) {\n      slotsLivres.push({\n        inicio: slotInicio.toISOString(),\n        fim: slotFim.toISOString(),\n        label: slotInicio.toLocaleString('pt-BR', {\n          timeZone: timezone,\n          weekday: 'long',\n          day: '2-digit',\n          month: '2-digit',\n          hour: '2-digit',\n          minute: '2-digit'\n        })\n      });\n    }\n\n    // Avança 30 minutos\n    slotInicio = new Date(slotInicio);\n    slotInicio.setUTCMinutes(slotInicio.getUTCMinutes() + 30);\n  }\n}\n\n// Retornar os 3 primeiros slots livres\nconst resultado = slotsLivres.slice(0, 3);\n\nif (resultado.length === 0) {\n  return [{ json: { \n    slots: [], \n    mensagem: 'Nenhum horário disponível para essa data.'\n  }}];\n}\n\nreturn resultado.map(slot => ({ json: slot }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4928,
+        1936
+      ],
+      "id": "a2aa761c-d1bb-4b2f-b318-829c8835b0f0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  s.id,\n  s.name,\n  COALESCE(ps.custom_duration_min, s.duration_min) AS duration_min\nFROM services s\nJOIN professional_services ps ON ps.service_id = s.id\nWHERE s.name ILIKE '%{{ $('When Executed by Another Workflow').item.json.nome_servico }}%'\nAND ps.professional_id = '{{ $('busca de profissional').item.json.id }}'\nAND s.business_id = '{{ $('When Executed by Another Workflow').item.json.business_id }}'\nAND s.active = true\nAND ps.active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4336,
+        1936
+      ],
+      "id": "9d5f8e34-dd3f-4e18-b18d-5719922d8945",
+      "name": "duracao do servico",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name \nFROM professionals \nWHERE name ILIKE '%{{ $('When Executed by Another Workflow').item.json.nome_profissional }}%'\nAND business_id = '{{ $('When Executed by Another Workflow').item.json.business_id }}'\nAND active = true \nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4128,
+        2304
+      ],
+      "id": "48cc95e6-ccc2-404d-9789-dec77d9eea67",
+      "name": "busca de profissional1",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  s.id,\n  s.name,\n  COALESCE(ps.custom_duration_min, s.duration_min) AS duration_min\nFROM services s\nJOIN professional_services ps ON ps.service_id = s.id\nWHERE s.name ILIKE '%{{ $('When Executed by Another Workflow').item.json.nome_servico }}%'\nAND ps.professional_id = '{{ $('busca de profissional1').item.json.id }}'\nAND s.business_id = '{{ $('When Executed by Another Workflow').item.json.business_id }}'\nAND s.active = true\nAND ps.active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4352,
+        2304
+      ],
+      "id": "2ea69d22-da4b-4e56-8977-761f5a3a4f51",
+      "name": "duracao do servico1",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id \nFROM appointments\nWHERE professional_id = '{{ $('busca de profissional1').item.json.id }}'\nAND status NOT IN ('cancelled_by_client', 'cancelled_by_business', 'cancelled_auto')\nAND scheduled_at < '{{ $('When Executed by Another Workflow').item.json.data_consulta_reuniao }}'::timestamptz + ({{ $('duracao do servico1').item.json.duration_min }} * interval '1 minute')\nAND ends_at > '{{ $('When Executed by Another Workflow').item.json.data_consulta_reuniao }}'::timestamptz\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4560,
+        2304
+      ],
+      "id": "6624337e-6b5a-4b6b-835d-db1c715a8f59",
+      "name": "verifica conflito",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "773a42f8-44c4-4ee7-9da0-7fb3fd68c9e1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4752,
+        2304
+      ],
+      "id": "011ece56-ddc8-49bf-a2e1-0db47eff8c5c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1927aa7-0487-4d89-8457-84401268f196",
+              "name": "response",
+              "value": "={{ 'Horários disponíveis para ' + $('When Executed by Another Workflow').item.json.nome_profissional + ':\\n\\n' + $input.all().map((item, i) => (i+1) + '. ' + item.json.label).join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5088,
+        1936
+      ],
+      "id": "a51f20f0-3c8e-4dd9-aacd-dc438dc0d481",
+      "name": "response",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1927aa7-0487-4d89-8457-84401268f196",
+              "name": "response",
+              "value": "=response → Esse horário já está ocupado para {{ $('When Executed by Another Workflow').item.json.nome_profissional }}. Por favor, escolha outro horário.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4928,
+        2208
+      ],
+      "id": "9899cc36-8716-441e-9393-696a14066109",
+      "name": "response1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO appointments (\n  business_id,\n  client_id,\n  professional_id,\n  service_id,\n  scheduled_at,\n  ends_at,\n  status,\n  source\n) VALUES (\n  '{{ $('When Executed by Another Workflow').item.json.business_id }}',\n  '{{ $('When Executed by Another Workflow').item.json.client_id }}',\n  '{{ $('busca de profissional1').item.json.id }}',\n  '{{ $('duracao do servico1').item.json.id }}',\n  '{{ $('When Executed by Another Workflow').item.json.data_consulta_reuniao }}'::timestamptz,\n  '{{ $('When Executed by Another Workflow').item.json.data_consulta_reuniao }}'::timestamptz + ({{ $('duracao do servico1').item.json.duration_min }} * interval '1 minute'),\n  'pending',\n  'whatsapp'\n)\nRETURNING id, scheduled_at, ends_at;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4928,
+        2352
+      ],
+      "id": "d0c2f54d-660c-4b14-9885-7ddba385ff98",
+      "name": "INSERT",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1927aa7-0487-4d89-8457-84401268f196",
+              "name": "response",
+              "value": "=response → Agendamento confirmado! ✅\n\nProfissional: {{ $('When Executed by Another Workflow').item.json.nome_profissional }}\nServiço: {{ $('When Executed by Another Workflow').item.json.nome_servico }}\nData/Hora: {{ DateTime.fromISO($json.scheduled_at).setZone($('When Executed by Another Workflow').item.json.timezone).toFormat('dd/MM/yyyy HH:mm') }}\nTérmino: {{ DateTime.fromISO($json.ends_at).setZone($('When Executed by Another Workflow').item.json.timezone).toFormat('HH:mm') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5344,
+        2352
+      ],
+      "id": "b8fd08ce-e2d4-4fb2-9524-2a91c87e3643",
+      "name": "response2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  a.id,\n  a.scheduled_at,\n  a.ends_at,\n  p.name as profissional,\n  s.name as servico\nFROM appointments a\nJOIN professionals p ON a.professional_id = p.id\nJOIN services s ON a.service_id = s.id\nWHERE a.client_id = '{{ $('When Executed by Another Workflow').item.json.client_id }}'\nAND a.business_id = '{{ $('When Executed by Another Workflow').item.json.business_id }}'\nAND a.status IN ('pending', 'confirmed')\nAND a.scheduled_at > now()\nORDER BY a.scheduled_at ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4128,
+        2848
+      ],
+      "id": "61c523fb-972b-4f72-8d4f-777cf801845e",
+      "name": "busca agendamentos do cliente",
+      "retryOnFail": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7b302c04-ee84-48e4-96a5-6aabc6d339c1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4336,
+        2848
+      ],
+      "id": "be84e95e-ca0a-4368-9a87-0350b2a77294",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1927aa7-0487-4d89-8457-84401268f196",
+              "name": "response",
+              "value": "=Você não possui agendamentos futuros para cancelar. 😊",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4528,
+        3008
+      ],
+      "id": "9a933073-7007-48b8-9852-052b707708e7",
+      "name": "response3",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1927aa7-0487-4d89-8457-84401268f196",
+              "name": "response",
+              "value": "={{ 'Seus agendamentos:\\n\\n' + $input.all().map((item, i) => (i+1) + '. ' + item.json.servico + ' com ' + item.json.profissional + '\\n📅 ' + DateTime.fromISO(item.json.scheduled_at).setZone($('When Executed by Another Workflow').item.json.timezone).toFormat('dd/MM/yyyy HH:mm') + '\\n🆔 ' + item.json.id).join('\\n\\n') + '\\n\\nQual deseja cancelar? Informe o número.' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4528,
+        2832
+      ],
+      "id": "08300bb6-5715-4e0f-924a-1d34f91a8a61",
+      "name": "response4",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE appointments \nSET status = 'cancelled_by_client',\n    cancelled_reason = 'Cancelado via WhatsApp pelo cliente',\n    updated_at = now()\nWHERE id = '{{ $('When Executed by Another Workflow').item.json.appointment_id }}'\nAND client_id = '{{ $('When Executed by Another Workflow').item.json.client_id }}'\nAND business_id = '{{ $('When Executed by Another Workflow').item.json.business_id }}'\nAND status IN ('pending', 'confirmed')\nRETURNING id, scheduled_at;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4128,
+        2576
+      ],
+      "id": "27ec37fc-0223-4f9c-a39b-1d7a5d8d4c91",
+      "name": "UPDATE",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1927aa7-0487-4d89-8457-84401268f196",
+              "name": "response",
+              "value": "={{ 'Agendamento cancelado com sucesso! ✅\\n\\nSe quiser remarcar, é só me avisar. 😊' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4352,
+        2576
+      ],
+      "id": "dac23910-f3fb-410d-8922-024fc7dbc36c",
+      "name": "response5",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notification_queue (appointment_id, client_id, type, send_at)\nVALUES\n  (\n    '{{ $('INSERT').item.json.id }}',\n    '{{ $('When Executed by Another Workflow').item.json.client_id }}',\n    'reminder_d1',\n    '{{ $('INSERT').item.json.scheduled_at }}'::timestamptz - interval '1 day'\n  ),\n  (\n    '{{ $('INSERT').item.json.id }}',\n    '{{ $('When Executed by Another Workflow').item.json.client_id }}',\n    'reminder_h2',\n    '{{ $('INSERT').item.json.scheduled_at }}'::timestamptz - interval '2 hours'\n  );",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5136,
+        2352
+      ],
+      "id": "f66c1995-7aa4-450c-a70c-6d20bef75eff",
+      "name": "no de fila",
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "business_id"
+            },
+            {
+              "name": "client_id"
+            },
+            {
+              "name": "intencao"
+            },
+            {
+              "name": "nome_cliente"
+            },
+            {
+              "name": "telefone_cliente"
+            },
+            {
+              "name": "data_consulta_reuniao"
+            },
+            {
+              "name": "nome_profissional"
+            },
+            {
+              "name": "nome_servico"
+            },
+            {
+              "name": "timezone"
+            },
+            {
+              "name": "appointment_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        3344,
+        2400
+      ],
+      "id": "baf2a93d-3b18-4bae-9e17-0c313df65917",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "busca de profissional",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "busca de profissional1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UPDATE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "busca agendamentos do cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca de profissional": {
+      "main": [
+        [
+          {
+            "node": "duracao do servico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "horários de funcionamento": {
+      "main": [
+        [
+          {
+            "node": "agendamentos ocupados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agendamentos ocupados": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "duracao do servico": {
+      "main": [
+        [
+          {
+            "node": "horários de funcionamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca de profissional1": {
+      "main": [
+        [
+          {
+            "node": "duracao do servico1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "duracao do servico1": {
+      "main": [
+        [
+          {
+            "node": "verifica conflito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica conflito": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "INSERT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INSERT": {
+      "main": [
+        [
+          {
+            "node": "no de fila",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca agendamentos do cliente": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "response4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "response3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE": {
+      "main": [
+        [
+          {
+            "node": "response5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "no de fila": {
+      "main": [
+        [
+          {
+            "node": "response2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/Manaus",
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate"
+  },
+  "versionId": "f42bac5f-1d38-4a1c-87c5-c52f3cb6cb48",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "209eb7d0bed7cd0478f8ab8cf867ff130491d6be476d67a005563f25279d5bd4"
+  },
+  "id": "D0qV08T9eemLU4Ty",
+  "tags": [
+    {
+      "updatedAt": "2026-04-12T21:26:05.187Z",
+      "createdAt": "2026-04-12T21:26:05.187Z",
+      "id": "ODZBItftjva9iK8J",
+      "name": "PROJETO LUIZ-KAIO"
+    }
+  ]
+}

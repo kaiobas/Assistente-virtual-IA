@@ -1,0 +1,201 @@
+{
+  "name": "debug workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f352d79-a09f-4db8-bf94-f3d84f9c7402",
+              "name": "log_erro",
+              "value": "={{ \n'🚨 *ERRO NO FLUXO*\\n\\n' +\n'📋 *Workflow:* ' + $json.workflow.name + '\\n' +\n'🔴 *Node:* ' + $json.execution.lastNodeExecuted + '\\n' +\n'❌ *Erro:* ' + $json.execution.error.message + '\\n' +\n'🆔 *Execução:* ' + $json.execution.id + '\\n' +\n'🔗 *Link:* ' + $json.execution.url + '\\n' +\n'🕐 *Horário:* ' + $now.setZone('America/Manaus').toFormat('dd/MM/yyyy HH:mm:ss')\n}}",
+              "type": "string"
+            },
+            {
+              "id": "c9c64b0e-04cd-4050-9ff8-4ea593d2c2b3",
+              "name": "contexto_llm",
+              "value": "={{ \n'Workflow: ' + $json.workflow.name + '\\n' +\n'Node com erro: ' + $json.execution.lastNodeExecuted + '\\n' +\n'Mensagem de erro: ' + $json.execution.error.message + '\\n' +\n'Descrição: ' + ($json.execution.error.description ?? 'não disponível') + '\\n' +\n'Stack trace: ' + ($json.execution.error.stack ?? 'não disponível')\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -128
+      ],
+      "id": "1ad68b17-2192-4bf5-9ce3-f3b367c0258d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evo.vps.luizvinycius.com.br/message/sendText/whatsap-comercial-testes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "A07142B05AF4-43E9-9DB3-47D4341FFA78"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ \"number\": \"120363407626287146@g.us\", \"text\": $('Edit Fields').item.json.log_erro }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "42e6dd50-55a5-480d-9721-434c773fade4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ 'Você é um especialista em n8n e automações. Analise o erro abaixo e sugira uma possível causa e solução em português, de forma objetiva:\\n\\n' + $('Edit Fields').item.json.contexto_llm }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        -128
+      ],
+      "id": "1f1001a2-31de-4e26-993a-92f49f1ec129",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "iVAQFIBYu3YwLZHW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evo.vps.luizvinycius.com.br/message/sendText/whatsap-comercial-testes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "A07142B05AF4-43E9-9DB3-47D4341FFA78"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ \"number\": \"120363407626287146@g.us\", \"text\": \"🤖 *Análise IA:*\\n\\n\" + $json.output[0].content[0].text }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        736,
+        -128
+      ],
+      "id": "d695923b-d89a-4aab-a642-474f50aba088",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -128
+      ],
+      "id": "01cef289-1f67-4a88-a3f4-e3e35cacf690",
+      "name": "Error Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "binaryMode": "separate"
+  },
+  "versionId": "e95f059a-34f8-4dea-abbc-fd619543454e",
+  "meta": {
+    "instanceId": "209eb7d0bed7cd0478f8ab8cf867ff130491d6be476d67a005563f25279d5bd4"
+  },
+  "id": "3K2KKNm9pFgpxf5FjiljA",
+  "tags": [
+    {
+      "updatedAt": "2026-04-12T21:26:05.187Z",
+      "createdAt": "2026-04-12T21:26:05.187Z",
+      "id": "ODZBItftjva9iK8J",
+      "name": "PROJETO LUIZ-KAIO"
+    }
+  ]
+}

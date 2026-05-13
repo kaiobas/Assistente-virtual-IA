@@ -1,0 +1,783 @@
+{
+  "name": "NOTIFICADOR AGENDAMENTOS",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "60bde1e9-3c6e-4b44-9681-aabd7cf6e35a",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        7968,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  nq.id AS queue_id,\n  nq.appointment_id,\n  nq.client_id,\n  nq.type AS notification_type,\n  nq.send_at,\n  nq.expires_at,\n  nq.attempts,\n  a.scheduled_at,\n  a.ends_at,\n  a.status AS appointment_status,\n  s.name AS service_name,\n  p.name AS professional_name,\n  c.phone AS client_phone,\n  c.name AS client_name,\n  b.id AS business_id,\n  b.agent_name,\n  b.timezone,\n  b.phone_number AS business_phone,\n  b.name AS business_name\nFROM notification_queue nq\nJOIN appointments a ON nq.appointment_id = a.id\nJOIN services s ON a.service_id = s.id\nJOIN professionals p ON a.professional_id = p.id\nJOIN clients c ON nq.client_id = c.id\nJOIN business b ON a.business_id = b.id\nWHERE nq.status = 'pending'\n  AND nq.send_at <= now()\n  AND nq.attempts < 3\n  AND c.ia_status <> 'blocked'\n  AND b.active = true\n  AND (nq.expires_at IS NULL OR nq.expires_at > now())\n  AND (\n    -- cancellation_notice passa mesmo com appointment cancelado\n    nq.type = 'cancellation_notice'\n    OR\n    -- outras notificacoes so disparam com appointment ativo\n    (nq.type IN ('reminder_d1','reminder_h2','booking_created','booking_confirmed','confirmation_request')\n     AND a.status IN ('pending','confirmed'))\n  )\n  AND (\n    -- Pula reminder_d1 se o appointment ja esta dentro de 23h\n    -- (cliente marcou com pouca antecedencia, nao faz sentido lembrar 'amanha')\n    nq.type != 'reminder_d1'\n    OR a.scheduled_at >= now() + INTERVAL '23 hours'\n  )\nORDER BY\n  CASE nq.type\n    WHEN 'cancellation_notice' THEN 1\n    WHEN 'booking_created'     THEN 2\n    WHEN 'reminder_h2'         THEN 3\n    ELSE 4\n  END,\n  nq.send_at ASC\nLIMIT 20;",
+        "options": {}
+      },
+      "id": "cc767e73-da1d-4797-a205-6c61bb8dd766",
+      "name": "busca notificacoes pendentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        8192,
+        3120
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "id": "check-has-items"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d0b95a09-0676-4803-9c68-9321adf209c8",
+      "name": "tem notificacoes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8416,
+        3120
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "9545b876-394d-4a1a-8323-5bbf4d70ebc1",
+      "name": "nenhuma pendente",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        8640,
+        3280
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1085b71e-30af-4aa0-976d-384e68ffab34",
+      "name": "Loop notificacoes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        8640,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Soft lock: incrementa attempts antes de tentar enviar.\n-- Se o n8n cair no meio, a notificacao nao fica refazendo eternamente.\nUPDATE notification_queue\nSET attempts = attempts + 1\nWHERE id = '{{ $json.queue_id }}'\nRETURNING id, attempts;",
+        "options": {}
+      },
+      "id": "6efacd55-3087-4e95-94ac-7a77ea6191e3",
+      "name": "incrementa tentativa",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        8848,
+        3120
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Loop notificacoes').item.json.notification_type }}",
+                    "rightValue": "reminder_d1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "r1"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reminder_d1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Loop notificacoes').item.json.notification_type }}",
+                    "rightValue": "reminder_h2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "r2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reminder_h2"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Loop notificacoes').item.json.notification_type }}",
+                    "rightValue": "booking_created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "r3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "booking_created"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Loop notificacoes').item.json.notification_type }}",
+                    "rightValue": "cancellation_notice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "r4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancellation_notice"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "74d83a9a-bba6-447f-89cd-2e8bd9629dc2",
+      "name": "tipo de notificacao",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        9072,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-d1",
+              "name": "mensagem",
+              "value": "=Olá {{ $('Loop notificacoes').item.json.client_name }}! 👋\n\nPassando para lembrar do seu agendamento *amanhã* em {{ $('Loop notificacoes').item.json.business_name }}:\n\n📋 *Serviço:* {{ $('Loop notificacoes').item.json.service_name }}\n👤 *Profissional:* {{ $('Loop notificacoes').item.json.professional_name }}\n📅 *Data:* {{ DateTime.fromISO($('Loop notificacoes').item.json.scheduled_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('dd/MM/yyyy') }}\n🕐 *Horário:* {{ DateTime.fromISO($('Loop notificacoes').item.json.scheduled_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('HH:mm') }}\n\nSe precisar cancelar ou remarcar, é só me avisar por aqui. 😊",
+              "type": "string"
+            },
+            {
+              "id": "phone-d1",
+              "name": "telefone",
+              "value": "={{ $('Loop notificacoes').item.json.client_phone }}",
+              "type": "string"
+            },
+            {
+              "id": "inst-d1",
+              "name": "instancia",
+              "value": "={{ $('Loop notificacoes').item.json.business_phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "749edbbf-9f08-41cd-be00-3dd453560b5b",
+      "name": "monta mensagem D-1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        9312,
+        2864
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-h2",
+              "name": "mensagem",
+              "value": "=Oi {{ $('Loop notificacoes').item.json.client_name }}! ⏰\n\nSeu agendamento é em *2 horas*!\n\n📋 *Serviço:* {{ $('Loop notificacoes').item.json.service_name }}\n👤 *Profissional:* {{ $('Loop notificacoes').item.json.professional_name }}\n🕐 *Horário:* {{ DateTime.fromISO($('Loop notificacoes').item.json.scheduled_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('HH:mm') }}\n\nTe esperamos! 🙌",
+              "type": "string"
+            },
+            {
+              "id": "phone-h2",
+              "name": "telefone",
+              "value": "={{ $('Loop notificacoes').item.json.client_phone }}",
+              "type": "string"
+            },
+            {
+              "id": "inst-h2",
+              "name": "instancia",
+              "value": "={{ $('Loop notificacoes').item.json.business_phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8644675-b182-41ab-8851-859281e607fa",
+      "name": "monta mensagem H-2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        9312,
+        3024
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-created",
+              "name": "mensagem",
+              "value": "=✅ *Agendamento Confirmado!*\n\nOlá {{ $('Loop notificacoes').item.json.client_name }}! Seu agendamento em {{ $('Loop notificacoes').item.json.business_name }} foi realizado com sucesso:\n\n📋 *Serviço:* {{ $('Loop notificacoes').item.json.service_name }}\n👤 *Profissional:* {{ $('Loop notificacoes').item.json.professional_name }}\n📅 *Data:* {{ DateTime.fromISO($('Loop notificacoes').item.json.scheduled_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('dd/MM/yyyy') }}\n🕐 *Horário:* {{ DateTime.fromISO($('Loop notificacoes').item.json.scheduled_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('HH:mm') }} – {{ DateTime.fromISO($('Loop notificacoes').item.json.ends_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('HH:mm') }}\n\nQualquer dúvida, pode me chamar aqui. Até lá! 😊",
+              "type": "string"
+            },
+            {
+              "id": "phone-created",
+              "name": "telefone",
+              "value": "={{ $('Loop notificacoes').item.json.client_phone }}",
+              "type": "string"
+            },
+            {
+              "id": "inst-created",
+              "name": "instancia",
+              "value": "={{ $('Loop notificacoes').item.json.business_phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f633269-de75-40b3-a9bb-6e9baf42142e",
+      "name": "monta mensagem booking created",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        9312,
+        3184
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-cancel",
+              "name": "mensagem",
+              "value": "=Olá {{ $('Loop notificacoes').item.json.client_name }},\n\nInformamos que seu agendamento foi *cancelado*:\n\n📋 *Serviço:* {{ $('Loop notificacoes').item.json.service_name }}\n👤 *Profissional:* {{ $('Loop notificacoes').item.json.professional_name }}\n📅 *Data:* {{ DateTime.fromISO($('Loop notificacoes').item.json.scheduled_at).setZone($('Loop notificacoes').item.json.timezone).toFormat('dd/MM/yyyy HH:mm') }}\n\nSe desejar reagendar, é só me chamar aqui! 😊",
+              "type": "string"
+            },
+            {
+              "id": "phone-cancel",
+              "name": "telefone",
+              "value": "={{ $('Loop notificacoes').item.json.client_phone }}",
+              "type": "string"
+            },
+            {
+              "id": "inst-cancel",
+              "name": "instancia",
+              "value": "={{ $('Loop notificacoes').item.json.business_phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ce07a40b-77df-43c4-9ccf-5f5618b8d66b",
+      "name": "monta mensagem cancelamento",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        9312,
+        3344
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://evo.vps.luizvinycius.com.br/message/sendText/{{ $json.instancia }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "A07142B05AF4-43E9-9DB3-47D4341FFA78"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": {{ JSON.stringify($json.telefone.trim()) }},\n  \"text\": {{ JSON.stringify($json.mensagem) }}\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "68b947b3-4556-4b18-a017-168aaef2c65f",
+      "name": "envia WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9552,
+        3120
+      ],
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Sucesso: marca como enviada + registra no log\nWITH upd AS (\n  UPDATE notification_queue\n  SET status = 'sent'\n  WHERE id = '{{ $('Loop notificacoes').item.json.queue_id }}'\n  RETURNING id\n)\nINSERT INTO notification_log (\n  queue_id, appointment_id, channel, message_body, sent_at, delivery_status\n) VALUES (\n  '{{ $('Loop notificacoes').item.json.queue_id }}',\n  '{{ $('Loop notificacoes').item.json.appointment_id }}',\n  'whatsapp',\n  $msg${{ $('Loop notificacoes').item.json.notification_type }}$msg$,\n  now(),\n  'delivered'\n)\nRETURNING id;",
+        "options": {}
+      },
+      "id": "e6ecd2a1-5643-4d34-8a5d-7e0c50fe0116",
+      "name": "marca enviada + log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        9792,
+        3024
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('incrementa tentativa').item.json.attempts }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              },
+              "id": "check-max-attempts"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4b2f5d8e-034e-4fc3-a731-9beebd2ab587",
+      "name": "esgotou tentativas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9792,
+        3264
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Falha final: marca como failed + log com erro\nWITH upd AS (\n  UPDATE notification_queue\n  SET status = 'failed'\n  WHERE id = '{{ $('Loop notificacoes').item.json.queue_id }}'\n  RETURNING id\n)\nINSERT INTO notification_log (\n  queue_id, appointment_id, channel, message_body, sent_at, delivery_status, error_message\n) VALUES (\n  '{{ $('Loop notificacoes').item.json.queue_id }}',\n  '{{ $('Loop notificacoes').item.json.appointment_id }}',\n  'whatsapp',\n  '',\n  now(),\n  'failed',\n  $err${{ $json.error?.message ?? JSON.stringify($json.error ?? 'unknown error') }}$err$\n)\nRETURNING id;",
+        "options": {}
+      },
+      "id": "5c1a7942-e0a1-4700-84b0-d4b6b0693143",
+      "name": "marca falhada + log erro",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        10032,
+        3184
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "iRfyVZ8gFQCUoAhE",
+          "name": "Postgres_project"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "6911cd2b-131c-4b80-b6b7-2f20394351b5",
+      "name": "volta retry (mantem pending)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        10032,
+        3344
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "9ef253b0-5d6c-42ef-855f-2ce92c12a554",
+      "name": "proxima iteracao",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        10272,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🔔 NOTIFICADOR DE AGENDAMENTOS v3\n\n**Schedule:** 5 minutos\n\n**Tipos suportados:**\n- `reminder_d1` — 1 dia antes\n- `reminder_h2` — 2 horas antes\n- `booking_created` — confirmacao pos agendamento\n- `cancellation_notice` — aviso de cancelamento\n\n**Setup necessario:**\n\n1. **Credential** (Settings > Credentials):\n   - Tipo: Header Auth\n   - Nome: `Evolution API`\n   - Name: `apikey`\n   - Value: sua chave da Evolution\n   - Depois selecionar essa credential no no `envia WhatsApp`\n\n2. **Env var** no docker-compose do n8n:\n   - `EVOLUTION_API_URL=https://sua-evolution.com`\n   - `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`\n\n**Features:**\n- ✅ Multi-tenant (1 Evolution, N instancias)\n- ✅ Timezone-aware\n- ✅ Cancellation bypass\n- ✅ Expires_at respeitado\n- ✅ Retry com soft-lock (3x)\n- ✅ Error branching nativo\n- ✅ Log completo com error_message",
+        "height": 480,
+        "width": 420,
+        "color": 5
+      },
+      "id": "dc05c2e2-7fb9-44c2-a808-9ae026434ffe",
+      "name": "Sticky Note doc",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7968,
+        2576
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Fluxo apos HTTP\n\nSe **sucesso** → marca sent + log delivered\nSe **falha** e tentativas >= 3 → marca failed + log erro\nSe **falha** e tentativas < 3 → mantem pending, proximo ciclo tenta de novo",
+        "width": 400,
+        "color": 3
+      },
+      "id": "bb6f771c-01ad-4319-bde1-7f53e5513c46",
+      "name": "Sticky Note retry",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9792,
+        2864
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "busca notificacoes pendentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca notificacoes pendentes": {
+      "main": [
+        [
+          {
+            "node": "tem notificacoes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tem notificacoes?": {
+      "main": [
+        [
+          {
+            "node": "Loop notificacoes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "nenhuma pendente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop notificacoes": {
+      "main": [
+        [],
+        [
+          {
+            "node": "incrementa tentativa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "incrementa tentativa": {
+      "main": [
+        [
+          {
+            "node": "tipo de notificacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tipo de notificacao": {
+      "main": [
+        [
+          {
+            "node": "monta mensagem D-1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "monta mensagem H-2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "monta mensagem booking created",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "monta mensagem cancelamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "monta mensagem D-1": {
+      "main": [
+        [
+          {
+            "node": "envia WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "monta mensagem H-2": {
+      "main": [
+        [
+          {
+            "node": "envia WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "monta mensagem booking created": {
+      "main": [
+        [
+          {
+            "node": "envia WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "monta mensagem cancelamento": {
+      "main": [
+        [
+          {
+            "node": "envia WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "envia WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "marca enviada + log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "esgotou tentativas?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marca enviada + log": {
+      "main": [
+        [
+          {
+            "node": "proxima iteracao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "esgotou tentativas?": {
+      "main": [
+        [
+          {
+            "node": "marca falhada + log erro",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "volta retry (mantem pending)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marca falhada + log erro": {
+      "main": [
+        [
+          {
+            "node": "proxima iteracao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "volta retry (mantem pending)": {
+      "main": [
+        [
+          {
+            "node": "proxima iteracao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "proxima iteracao": {
+      "main": [
+        [
+          {
+            "node": "Loop notificacoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/Manaus",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "3K2KKNm9pFgpxf5FjiljA",
+    "binaryMode": "separate"
+  },
+  "versionId": "c1e135b7-972f-42bc-adcf-7b49ebc102e7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "209eb7d0bed7cd0478f8ab8cf867ff130491d6be476d67a005563f25279d5bd4"
+  },
+  "id": "kcLB5tNLveQDNcf_KW06W",
+  "tags": [
+    {
+      "updatedAt": "2026-04-12T21:26:05.187Z",
+      "createdAt": "2026-04-12T21:26:05.187Z",
+      "id": "ODZBItftjva9iK8J",
+      "name": "PROJETO LUIZ-KAIO"
+    }
+  ]
+}

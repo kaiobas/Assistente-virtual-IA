@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/store/auth.store'
 import { ROUTES } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,6 +30,13 @@ export default function LoginPage() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })
+
+  const enableDemoMode = useAuthStore((s) => s.enableDemoMode)
+
+  const handleDemo = () => {
+    enableDemoMode()
+    void navigate(ROUTES.DASHBOARD)
+  }
 
   const onSubmit = async (data: LoginForm) => {
     setLoading(true)
@@ -85,6 +93,19 @@ export default function LoginPage() {
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">ou</span>
+          </div>
+        </div>
+
+        <Button variant="outline" className="w-full" onClick={handleDemo}>
+          Entrar como Visitante
+        </Button>
       </div>
     </div>
   )

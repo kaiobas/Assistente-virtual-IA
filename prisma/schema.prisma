@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  contactId String    @map("contact_id")
+  contact   String
+  status    String    @default("active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  messages  Message[]
+  chunks    ContextChunk[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String        @id @default(uuid())
+  conversationId String        @map("conversation_id")
+  role           String
+  content        String
+  embedding      Unsupported("vector(1536)")?
+  mediaUrl       String?       @map("media_url")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([embedding], type: BTree)
+  @@map("messages")
+}
+
+model ContextChunk {
+  id             String       @id @default(uuid())
+  conversationId String       @map("conversation_id")
+  content        String
+  embedding      Unsupported("vector(1536)")
+  source         String       @default("conversation")
+  metadata       Json?
+  createdAt      DateTime     @default(now()) @map("created_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([embedding], type: BTree)
+  @@map("context_chunks")
+}
+
+model KnowledgeBase {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  embedding Unsupported("vector(1536)")?
+  tags      String[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([embedding], type: BTree)
+  @@map("knowledge_base")
+}

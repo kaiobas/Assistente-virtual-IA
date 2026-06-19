@@ -55,11 +55,28 @@ services:
     networks:
       - assistente-net
 
+  # ─── PostgreSQL (RAG + pgvector) ──────────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: postgres-rag
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: assistente_rag
+      POSTGRES_USER: assistente
+      POSTGRES_PASSWORD: assistente_local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - assistente-net
+
 # ─── Volumes ────────────────────────────────────────────────────────────────
 volumes:
   n8n_data:
   evolution_data:
   redis_data:
+  postgres_data:
 
 # ─── Networks ───────────────────────────────────────────────────────────────
 networks:

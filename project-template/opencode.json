@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "instructions": ["CLAUDE.md"],
+  "skills": {
+    "paths": ["skills"]
+  },
+  "agent": {
+    "rag-agent": {
+      "model": "openai/gpt-4o-mini",
+      "mode": "subagent",
+      "description": "Especialista em RAG com Prisma e Ollama embeddings. Use para buscar contexto vetorial, gerar embeddings, e preparar prompts enriquecidos.",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "read": "allow"
+      }
+    }
+  },
+  "references": {
+    "prisma-schema": {
+      "path": "prisma/schema.prisma",
+      "description": "Schema do Prisma com modelos RAG (Conversation, Message, ContextChunk, KnowledgeBase)"
+    },
+    "docs": {
+      "path": "docs",
+      "description": "Documentação do projeto"
+    }
+  }
+}

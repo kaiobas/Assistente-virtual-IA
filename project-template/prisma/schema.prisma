@@ -1,0 +1,69 @@
+// Schema Prisma — Template para RAG vetorial com PostgreSQL + pgvector
+// Copie para a raiz do projeto e adapte conforme necessário
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Sessões de conversa
+model Conversation {
+  id        String    @id @default(uuid())
+  contactId String    @map("contact_id")
+  contact   String
+  status    String    @default("active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  messages  Message[]
+  chunks    ContextChunk[]
+
+  @@map("conversations")
+}
+
+/// Mensagens individuais (com embedding opcional)
+model Message {
+  id             String        @id @default(uuid())
+  conversationId String        @map("conversation_id")
+  role           String
+  content        String
+  embedding      Unsupported("vector(768)")? // Ollama nomic-embed-text = 768d
+  mediaUrl       String?       @map("media_url")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+/// Chunks de contexto vetorizados para busca semântica
+model ContextChunk {
+  id             String       @id @default(uuid())
+  conversationId String       @map("conversation_id")
+  content        String
+  embedding      Unsupported("vector(768)")
+  source         String       @default("conversation")
+  metadata       Json?
+  createdAt      DateTime     @default(now()) @map("created_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([embedding], type: BTree)
+  @@map("context_chunks")
+}
+
+/// Base de conhecimento global
+model KnowledgeBase {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  embedding Unsupported("vector(768)")?
+  tags      String[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([embedding], type: BTree)
+  @@map("knowledge_base")
+}

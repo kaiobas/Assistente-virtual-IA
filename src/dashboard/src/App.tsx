@@ -20,10 +20,10 @@ const NotificationsPage = lazy(() => import('@/features/notifications/pages/Noti
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 
 function AppRoutes() {
-  const { user, authLoading } = useAuth()
+  const { user, authLoading, demoMode } = useAuth()
 
   // Segura todas as rotas (e portanto todas as queries) até a sessão ser confirmada
-  if (authLoading) {
+  if (authLoading && !demoMode) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -34,7 +34,7 @@ function AppRoutes() {
     )
   }
 
-  if (!user) {
+  if (!user && !demoMode) {
     return (
       <Routes>
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
@@ -56,7 +56,7 @@ function AppRoutes() {
           <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
           <Route path={ROUTES.NOTIFICATIONS} element={<NotificationsPage />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+          <Route path="*" element={<Navigate to={ROUTES.CONVERSATIONS} replace />} />
         </Routes>
       </Suspense>
       </AppLayout>

@@ -3,16 +3,17 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useAuth() {
-  const { setAuth, setBusinessId, clear } = useAuthStore()
+  const { setAuth, setBusinessId, clear, demoMode } = useAuthStore()
   const [authLoading, setAuthLoading] = useState(true)
 
   useEffect(() => {
+    if (demoMode) {
+      setAuthLoading(false)
+      return
+    }
+
     let ignore = false
 
-    /**
-     * Fire-and-forget: busca business_id sem bloquear o fluxo de auth.
-     * Usa .then() em vez de await para nunca travar o callback.
-     */
     function loadBusinessId(userId: string) {
       void supabase
         .from('business_users')
@@ -31,7 +32,6 @@ export function useAuth() {
         )
     }
 
-    // 1. Lê sessão do localStorage — libera o gate de loading.
     void supabase.auth.getSession().then(({ data: { session } }) => {
       if (ignore) return
       console.log('[useAuth] getSession:', session?.user?.id ?? 'sem sessão')
@@ -40,9 +40,6 @@ export function useAuth() {
       setAuthLoading(false)
     })
 
-    // 2. Eventos futuros (login, logout, token refresh).
-    //    Callback SÍNCRONO — crítico para não bloquear os internals do Supabase.
-    //    INITIAL_SESSION é ignorado (já tratado pelo getSession acima).
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {

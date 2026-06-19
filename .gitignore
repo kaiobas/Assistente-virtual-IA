@@ -39,3 +39,16 @@ docker-volumes/
 # Mídia temporária
 /tmp/
 *.tmp
+
+# Prisma
+prisma/migrations/
+prisma/*.db
+prisma/*.db-journal
+
+# RAG embeddings cache
+.embeddings/
+vector-store/
+
+# Skills
+skills/*/.env
+infra/seeds/seed-presentation.ts
